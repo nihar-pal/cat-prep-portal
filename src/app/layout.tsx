@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CATPrep | Master CAT, XAT, NMAT, SNAP Daily Targets",
-  description: "Elite CAT & OMET exam preparation platform with daily target questions, authentic TCS iON test engine, percentile estimator, mistake notebook, and IIM alum shortcuts.",
+  title: "Crepe 🐱 | Minimalist CAT & MBA Prep, Daily Targets & College Tracker",
+  description: "Minimalist, elite preparation platform for CAT, XAT, NMAT & SNAP. High-yield daily targets, authentic TCS iON mock engine, and comprehensive MBA college application tracker.",
 };
 
 export default function RootLayout({
@@ -28,8 +29,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
-        {children}
+      <body className="min-h-full flex flex-col bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-amber-500/20">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
