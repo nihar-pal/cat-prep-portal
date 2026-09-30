@@ -13,6 +13,7 @@ import {
   Calculator, 
   ChevronDown,
   Building2,
+  UserCheck,
   User,
   LogOut,
   Menu,
@@ -153,6 +154,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Building2 size={14} />
                 <span>College Tracker</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              </Link>
+
+              <Link
+                href="/profile-evaluator"
+                className={`px-3 py-1.5 rounded-full transition flex items-center space-x-1.5 ${
+                  pathname.startsWith('/profile-evaluator') 
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm' 
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900'
+                }`}
+              >
+                <UserCheck size={14} />
+                <span>Profile Evaluator</span>
               </Link>
 
               <Link
@@ -331,6 +344,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="block px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold"
             >
               College Application Tracker 🎓
+            </Link>
+            <Link
+              href="/profile-evaluator"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900"
+            >
+              Profile Evaluator & Cutoffs 📊
             </Link>
             <Link
               href="/mock-test"

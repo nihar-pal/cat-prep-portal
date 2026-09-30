@@ -203,7 +203,7 @@ export const AIQuestionGenerator: React.FC = () => {
                 onClick={() => setTopic(t)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                   topic === t
-                    ? 'bg-blue-600 text-white font-bold shadow'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold shadow-xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                 }`}
               >
@@ -396,7 +396,7 @@ export const AIQuestionGenerator: React.FC = () => {
                 </button>
                 <button
                   onClick={handleGenerate}
-                  className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow"
+                  className="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold shadow-sm"
                 >
                   Generate Another Question &rarr;
                 </button>

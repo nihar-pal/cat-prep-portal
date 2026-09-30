@@ -18,7 +18,8 @@ import {
   TrendingUp,
   BrainCircuit,
   Compass,
-  Building2
+  Building2,
+  UserCheck
 } from 'lucide-react';
 import { DailyTarget, ExamType, Question } from '@/types/exam';
 import { CAT_DAILY_TARGETS } from '@/data/catDailyTargets';
@@ -223,8 +224,8 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
         </div>
       </div>
 
-      {/* 4. Quick Actions Grid: College Tracker Highlight, AI Lab, Mistake Log */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* 4. Quick Actions Grid: College Tracker, Profile Evaluator, AI Lab, Mistake Log */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* College Application Tracker Callout */}
         <Link
           href="/colleges"
@@ -235,16 +236,38 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
               <Building2 size={18} />
             </div>
             <div className="flex items-center space-x-1.5 mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Feature Highlight</span>
-              <span className="text-[10px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 font-bold px-1.5 py-0.2 rounded-full">New</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Admissions</span>
             </div>
-            <h4 className="font-bold text-sm text-slate-900 dark:text-white">MBA College Application Tracker</h4>
+            <h4 className="font-bold text-sm text-slate-900 dark:text-white">College Tracker</h4>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-              Track deadlines, form fees, cutoffs, and placements across IIMs, FMS, XLRI, SPJIMR & NMIMS.
+              Track deadlines, form fees, cutoffs, and placements across IIMs, FMS, XLRI & SPJIMR.
             </p>
           </div>
           <div className="mt-4 text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center space-x-1">
-            <span>Open College Tracker &rarr;</span>
+            <span>Open Tracker &rarr;</span>
+          </div>
+        </Link>
+
+        {/* Profile Evaluator Callout */}
+        <Link
+          href="/profile-evaluator"
+          className="p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-amber-400/60 transition cursor-pointer group shadow-sm flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <UserCheck size={18} className="text-amber-500" />
+            </div>
+            <div className="flex items-center space-x-1.5 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">IIM CS Calculator</span>
+              <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 font-bold px-1.5 py-0.2 rounded-full">New</span>
+            </div>
+            <h4 className="font-bold text-sm text-slate-900 dark:text-white">Profile Evaluator</h4>
+            <p className="text-xs text-slate-500 mt-1">
+              Personalized cutoffs calculated for your exact 10th/12th/Grad scores, stream, and work-ex.
+            </p>
+          </div>
+          <div className="mt-4 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
+            <span>Evaluate Profile &rarr;</span>
           </div>
         </Link>
 
@@ -257,9 +280,10 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
             <div className="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
               <Sparkles size={18} className="text-amber-500" />
             </div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Practice Engine</div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">AI Question Lab</h4>
             <p className="text-xs text-slate-500 mt-1">
-              Generate custom, infinite CAT-standard questions on specific topics with step-by-step proofs and trap analysis.
+              Generate custom, infinite CAT-standard questions on specific topics with proofs and trap warnings.
             </p>
           </div>
           <div className="mt-4 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
@@ -274,8 +298,9 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
         >
           <div>
             <div className="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <TrendingUp size={18} className="text-indigo-500" />
+              <TrendingUp size={18} className="text-amber-500" />
             </div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Error Analysis</div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">My Mistake Log</h4>
             <p className="text-xs text-slate-500 mt-1">
               Review and re-attempt missed questions. Filter by calculation error, concept gap, or trap option.

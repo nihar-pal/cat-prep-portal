@@ -161,9 +161,9 @@ export default function MockTestPage() {
 
             <button
               onClick={() => startMockSession('CAT 2026 Comprehensive Benchmark Mock #1', allAvailableQuestions, 40)}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-lg transition"
+              className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-sm transition"
             >
-              <Play size={15} className="fill-white" />
+              <Play size={15} className="fill-current" />
               <span>Launch Authentic Test Interface</span>
             </button>
           </div>
@@ -172,7 +172,7 @@ export default function MockTestPage() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold uppercase px-2.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                <span className="text-xs font-bold uppercase px-2.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200">
                   Sectional Drills
                 </span>
                 <span className="text-xs font-mono text-slate-500 font-semibold">

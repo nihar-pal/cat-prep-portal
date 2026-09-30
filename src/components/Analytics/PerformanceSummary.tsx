@@ -13,14 +13,17 @@ import {
   RotateCcw, 
   ArrowRight, 
   BookOpen, 
-  Sparkles,
-  Zap,
-  Filter,
-  Check
+  Sparkles, 
+  Zap, 
+  Filter, 
+  Check,
+  Bot
 } from 'lucide-react';
 import { Question, UserResponse, ExamType, MistakeEntry } from '@/types/exam';
 import { EXAM_CONFIGS } from '@/data/multiExamConfigs';
 import { MathRenderer } from '@/components/MathRenderer';
+import { PostSubmissionAiCoach } from '@/components/Chat/PostSubmissionAiCoach';
+import { CuteCatLogo } from '@/components/CuteCatLogo';
 
 interface PerformanceSummaryProps {
   title: string;
@@ -58,7 +61,7 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
     timeSeconds: number;
   }> = {};
 
-  questions.forEach(q => {
+  const questionsSummary = questions.map(q => {
     const sec = q.section;
     if (!sectionStats[sec]) {
       sectionStats[sec] = { total: 0, attempted: 0, correct: 0, wrong: 0, score: 0, timeSeconds: 0 };
@@ -71,11 +74,12 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
     const timeSpent = resp?.timeSpentSeconds || 0;
     sectionStats[sec].timeSeconds += timeSpent;
 
+    let isCorrect = false;
     if (!isAttempted) {
       unattemptedCount++;
     } else {
       sectionStats[sec].attempted++;
-      const isCorrect = userAns.toLowerCase() === q.correctAnswer.trim().toLowerCase();
+      isCorrect = userAns.toLowerCase() === q.correctAnswer.trim().toLowerCase();
 
       if (isCorrect) {
         correctCount++;
@@ -91,13 +95,24 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
         sectionStats[sec].score += pts;
       }
     }
+
+    return {
+      id: q.id,
+      section: q.section,
+      topic: q.topic,
+      isCorrect,
+      isAttempted,
+      userAnswer: userAns,
+      correctAnswer: q.correctAnswer,
+      timeSeconds: timeSpent
+    };
   });
 
   const attemptedCount = correctCount + wrongCount;
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
   const maxPossibleScore = questions.reduce((acc, q) => acc + examConfig.scoring.correctMcq, 0);
 
-  // Percentile Estimation Logic based on raw score ratio
+  // Percentile Estimation Logic
   const scorePercentage = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
   let estimatedPercentile = 70.0;
   if (scorePercentage >= 75) estimatedPercentile = 99.8;
@@ -107,7 +122,6 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
   else if (scorePercentage >= 30) estimatedPercentile = 90.0;
   else if (scorePercentage >= 20) estimatedPercentile = 80.0;
 
-  // Trigger celebration confetti for high scores!
   useEffect(() => {
     if (estimatedPercentile >= 95) {
       try {
@@ -116,9 +130,7 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
           spread: 70,
           origin: { y: 0.6 }
         });
-      } catch (e) {
-        // gracefully ignore if canvas not supported
-      }
+      } catch (e) {}
     }
   }, [estimatedPercentile]);
 
@@ -159,7 +171,6 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
     try {
       const stored = localStorage.getItem('cat_mistake_book');
       const list: MistakeEntry[] = stored ? JSON.parse(stored) : [];
-      // avoid duplicates for same question
       const filtered = list.filter(item => item.question.id !== q.id);
       filtered.push(newEntry);
       localStorage.setItem('cat_mistake_book', JSON.stringify(filtered));
@@ -171,52 +182,53 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-zinc-50/70 dark:bg-zinc-950 py-8 px-4 sm:px-6 lg:px-8 font-sans text-zinc-900 dark:text-zinc-100">
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header navigation bar */}
+        {/* Navigation bar */}
         <div className="flex items-center justify-between">
           <button
             onClick={onBackToDashboard}
-            className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 flex items-center space-x-1"
+            className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center space-x-1"
           >
             <span>&larr; Back to Dashboard</span>
           </button>
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-            {examType} Exam Scorecard
-          </span>
+          <div className="flex items-center space-x-2">
+            <CuteCatLogo size={20} />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800">
+              {examType} Diagnostic Scorecard
+            </span>
+          </div>
         </div>
 
-        {/* 1. Hero Scorecard Card */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-700/60 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
+        {/* 1. Hero Scorecard - Minimalist Dark Charcoal / Warm Zinc (Non-bluish) */}
+        <div className="bg-zinc-900 text-zinc-100 rounded-3xl p-6 sm:p-8 shadow-sm border border-zinc-800 relative overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
                 <Trophy size={16} />
                 <span>Test Completed</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{title}</h1>
-              <p className="text-sm text-slate-300 mt-1">
-                Evaluation under official {examType} scoring (+{examConfig.scoring.correctMcq} / {examConfig.scoring.incorrectMcq})
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">{title}</h1>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                Evaluated under official {examType} marking (+{examConfig.scoring.correctMcq} / {examConfig.scoring.incorrectMcq})
               </p>
             </div>
 
             {/* Score & Percentile Badges */}
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="bg-slate-800/80 backdrop-blur border border-slate-700 p-4 rounded-xl text-center min-w-[120px]">
-                <div className="text-xs font-semibold text-slate-400 uppercase">Raw Score</div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="bg-zinc-800/80 border border-zinc-700/80 p-4 rounded-2xl text-center min-w-[120px]">
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Raw Score</div>
                 <div className="text-3xl font-black text-white mt-0.5">
-                  {totalScore} <span className="text-xs font-normal text-slate-400">/ {maxPossibleScore}</span>
+                  {totalScore} <span className="text-xs font-normal text-zinc-400">/ {maxPossibleScore}</span>
                 </div>
               </div>
 
-              <div className="bg-emerald-950/80 backdrop-blur border border-emerald-600/50 p-4 rounded-xl text-center min-w-[140px]">
-                <div className="text-xs font-semibold text-emerald-400 uppercase flex items-center justify-center space-x-1">
-                  <Sparkles size={12} />
+              <div className="bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-2xl text-center min-w-[130px]">
+                <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-center space-x-1">
+                  <Sparkles size={11} />
                   <span>Est. Percentile</span>
                 </div>
-                <div className="text-3xl font-black text-emerald-300 mt-0.5">
+                <div className="text-3xl font-black text-emerald-400 mt-0.5 font-mono">
                   {estimatedPercentile.toFixed(1)}%ile
                 </div>
               </div>
@@ -224,58 +236,58 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-700/60">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-zinc-800">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
-                <CheckCircle2 size={18} />
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                <CheckCircle2 size={16} />
               </div>
               <div>
-                <div className="text-xs text-slate-400">Correct</div>
-                <div className="text-base font-bold text-white">{correctCount} Questions</div>
+                <div className="text-[11px] text-zinc-400">Correct</div>
+                <div className="text-sm font-bold text-white">{correctCount} Questions</div>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400">
-                <XCircle size={18} />
+              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400">
+                <XCircle size={16} />
               </div>
               <div>
-                <div className="text-xs text-slate-400">Incorrect</div>
-                <div className="text-base font-bold text-white">{wrongCount} Questions</div>
+                <div className="text-[11px] text-zinc-400">Incorrect</div>
+                <div className="text-sm font-bold text-white">{wrongCount} Questions</div>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
-                <Target size={18} />
+              <div className="p-2 rounded-xl bg-zinc-800 text-zinc-300">
+                <Target size={16} />
               </div>
               <div>
-                <div className="text-xs text-slate-400">Accuracy</div>
-                <div className="text-base font-bold text-white">{accuracy}%</div>
+                <div className="text-[11px] text-zinc-400">Accuracy</div>
+                <div className="text-sm font-bold text-white">{accuracy}%</div>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400">
-                <Clock size={18} />
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+                <Clock size={16} />
               </div>
               <div>
-                <div className="text-xs text-slate-400">Time Taken</div>
-                <div className="text-base font-bold text-white">{formatSeconds(totalTimeSpentSeconds)}</div>
+                <div className="text-[11px] text-zinc-400">Time Taken</div>
+                <div className="text-sm font-bold text-white">{formatSeconds(totalTimeSpentSeconds)}</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 2. Section-by-Section Diagnostic Table */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center space-x-2">
-            <Target size={18} className="text-blue-600" />
+        {/* 2. Sectional Diagnostic Table */}
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200/80 dark:border-zinc-800">
+          <h2 className="text-base font-bold text-zinc-900 dark:text-white mb-4 flex items-center space-x-2">
+            <Target size={17} className="text-amber-500" />
             <span>Sectional Performance Diagnostics</span>
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+            <table className="w-full text-left text-xs text-zinc-700 dark:text-zinc-300">
+              <thead className="bg-zinc-50 dark:bg-zinc-800/60 uppercase font-semibold text-zinc-400 border-b border-zinc-200 dark:border-zinc-700">
                 <tr>
                   <th className="py-3 px-4">Section</th>
                   <th className="py-3 px-4">Attempted</th>
@@ -286,12 +298,12 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                   <th className="py-3 px-4">Time Spent</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {Object.entries(sectionStats).map(([sec, stats]) => {
                   const secAcc = stats.attempted > 0 ? Math.round((stats.correct / stats.attempted) * 100) : 0;
                   return (
-                    <tr key={sec} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{sec}</td>
+                    <tr key={sec} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
+                      <td className="py-3 px-4 font-bold text-zinc-900 dark:text-white">{sec}</td>
                       <td className="py-3 px-4">{stats.attempted} / {stats.total}</td>
                       <td className="py-3 px-4 text-emerald-600 font-semibold">{stats.correct}</td>
                       <td className="py-3 px-4 text-rose-500 font-semibold">{stats.wrong}</td>
@@ -304,8 +316,8 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                           {secAcc}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{stats.score}</td>
-                      <td className="py-3 px-4 text-slate-500">{formatSeconds(stats.timeSeconds)}</td>
+                      <td className="py-3 px-4 font-bold text-zinc-900 dark:text-white">{stats.score}</td>
+                      <td className="py-3 px-4 text-zinc-500">{formatSeconds(stats.timeSeconds)}</td>
                     </tr>
                   );
                 })}
@@ -314,16 +326,32 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
           </div>
         </div>
 
-        {/* 3. Comprehensive Question Solutions & Trap Analysis */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        {/* 3. NEW FEATURE: Embedded Post-Submission AI Chatbot Coach */}
+        <PostSubmissionAiCoach
+          testContext={{
+            title,
+            totalScore,
+            maxScore: maxPossibleScore,
+            percentile: estimatedPercentile,
+            accuracy,
+            correctCount,
+            wrongCount,
+            unattemptedCount,
+            totalTimeSeconds: totalTimeSpentSeconds,
+            questionsSummary
+          }}
+        />
+
+        {/* 4. Comprehensive Solutions & Trap Breakdown */}
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200/80 dark:border-zinc-800 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                <BookOpen size={20} className="text-indigo-600" />
-                <span>Deep Solution Review & Trap Breakdown</span>
+              <h2 className="text-base font-bold text-zinc-900 dark:text-white flex items-center space-x-2">
+                <BookOpen size={18} className="text-amber-500" />
+                <span>Deep Solution Review & Distractor Trap Analysis</span>
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Review expert step-by-step methods, IIM Alum shortcut hacks, and avoid common test-taker traps.
+              <p className="text-xs text-zinc-500 mt-0.5">
+                Step-by-step proofs, IIM Alum shortcut speed hacks, and trap option warnings.
               </p>
             </div>
 
@@ -331,40 +359,40 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
             <div className="flex flex-wrap items-center gap-1.5 text-xs">
               <button
                 onClick={() => setFilterType('ALL')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                className={`px-3 py-1.5 rounded-xl font-bold transition ${
                   filterType === 'ALL'
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
                 }`}
               >
                 All ({questions.length})
               </button>
               <button
                 onClick={() => setFilterType('INCORRECT')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                className={`px-3 py-1.5 rounded-xl font-bold transition ${
                   filterType === 'INCORRECT'
                     ? 'bg-rose-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
                 }`}
               >
                 Wrong ({wrongCount})
               </button>
               <button
                 onClick={() => setFilterType('UNATTEMPTED')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                className={`px-3 py-1.5 rounded-xl font-bold transition ${
                   filterType === 'UNATTEMPTED'
                     ? 'bg-amber-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
                 }`}
               >
                 Unattempted ({unattemptedCount})
               </button>
               <button
                 onClick={() => setFilterType('CORRECT')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
+                className={`px-3 py-1.5 rounded-xl font-bold transition ${
                   filterType === 'CORRECT'
                     ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
                 }`}
               >
                 Correct ({correctCount})
@@ -374,7 +402,7 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
 
           {/* Question List */}
           <div className="space-y-6">
-            {filteredQuestions.map((q, idx) => {
+            {filteredQuestions.map((q) => {
               const resp = responses[q.id];
               const userAns = resp?.userAnswer?.trim() || '';
               const isAttempted = userAns.length > 0;
@@ -384,21 +412,20 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
               return (
                 <div 
                   key={q.id}
-                  className={`p-5 rounded-xl border transition ${
+                  className={`p-5 rounded-2xl border transition ${
                     !isAttempted 
-                      ? 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40'
+                      ? 'border-zinc-200 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/30'
                       : isCorrect
-                      ? 'border-emerald-200 dark:border-emerald-950 bg-emerald-50/30 dark:bg-emerald-950/10'
-                      : 'border-rose-200 dark:border-rose-950 bg-rose-50/30 dark:bg-rose-950/10'
+                      ? 'border-emerald-200 dark:border-emerald-950 bg-emerald-50/20 dark:bg-emerald-950/10'
+                      : 'border-rose-200 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/10'
                   }`}
                 >
-                  {/* Question header badge */}
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <div className="flex items-center space-x-2">
-                      <span className="font-bold text-xs bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded">
+                      <span className="font-bold text-xs bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 px-2.5 py-0.5 rounded-full">
                         {q.section} &bull; {q.topic}
                       </span>
-                      <span className="text-[11px] text-slate-500">
+                      <span className="text-[11px] text-zinc-400">
                         {q.pastYearReference}
                       </span>
                     </div>
@@ -417,62 +444,58 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                           </span>
                         )
                       ) : (
-                        <span className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+                        <span className="text-xs font-medium text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 rounded-full">
                           Unattempted (0)
                         </span>
                       )}
 
-                      {/* Add to Mistake Book Button */}
                       {!isCorrect && (
                         <button
                           onClick={() => setMistakeModalQ(q)}
                           disabled={isSavedInMistakes}
-                          className={`flex items-center space-x-1 text-xs font-semibold px-2.5 py-1 rounded transition ${
+                          className={`flex items-center space-x-1 text-xs font-semibold px-2.5 py-1 rounded-xl transition ${
                             isSavedInMistakes
                               ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                              : 'bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
+                              : 'bg-zinc-100 hover:bg-amber-50 text-zinc-700 hover:text-amber-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700'
                           }`}
                         >
                           {isSavedInMistakes ? <Check size={12} /> : <Bookmark size={12} />}
-                          <span>{isSavedInMistakes ? 'In Mistake Book' : 'Log to Mistake Book'}</span>
+                          <span>{isSavedInMistakes ? 'In Mistake Log' : 'Log to Mistake Book'}</span>
                         </button>
                       )}
                     </div>
                   </div>
 
-                  {/* Context excerpt if exists */}
                   {q.contextText && (
-                    <details className="mb-3 text-xs bg-slate-100 dark:bg-slate-800/80 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <summary className="font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                        View Passage / Caselet Context
+                    <details className="mb-3 text-xs bg-zinc-100/70 dark:bg-zinc-800/70 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-700">
+                      <summary className="font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+                        View Reading Passage / Caselet Context
                       </summary>
-                      <div className="mt-2 text-slate-600 dark:text-slate-300 max-h-48 overflow-y-auto">
+                      <div className="mt-2 text-zinc-600 dark:text-zinc-300 max-h-48 overflow-y-auto">
                         <MathRenderer content={q.contextText} />
                       </div>
                     </details>
                   )}
 
-                  {/* Question Text */}
                   <div className="text-sm font-medium mb-3">
                     <MathRenderer content={q.questionText} />
                   </div>
 
-                  {/* MCQ Options Display */}
                   {q.options && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 text-xs">
                       {q.options.map(opt => {
                         const isCorrectOption = opt.id === q.correctAnswer;
                         const isUserChoice = userAns === opt.id;
 
-                        let style = 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700';
+                        let style = 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700';
                         if (isCorrectOption) {
-                          style = 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 font-semibold text-emerald-900 dark:text-emerald-200 ring-1 ring-emerald-500';
+                          style = 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500 font-semibold text-emerald-900 dark:text-emerald-200 ring-1 ring-emerald-500';
                         } else if (isUserChoice && !isCorrect) {
-                          style = 'bg-rose-50 dark:bg-rose-950/60 border-rose-500 font-semibold text-rose-900 dark:text-rose-200 line-through';
+                          style = 'bg-rose-50 dark:bg-rose-950/50 border-rose-500 font-semibold text-rose-900 dark:text-rose-200 line-through';
                         }
 
                         return (
-                          <div key={opt.id} className={`p-2.5 rounded-lg border flex items-start space-x-2 ${style}`}>
+                          <div key={opt.id} className={`p-3 rounded-xl border flex items-start space-x-2 ${style}`}>
                             <span className="font-bold">{opt.id}.</span>
                             <div className="flex-1">
                               <MathRenderer content={opt.text} />
@@ -485,43 +508,42 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                     </div>
                   )}
 
-                  {/* Answer Summary Callout */}
-                  <div className="bg-slate-100 dark:bg-slate-800/60 rounded-lg p-3 text-xs flex flex-wrap items-center justify-between gap-2 mb-4">
+                  {/* Summary Bar */}
+                  <div className="bg-zinc-100/70 dark:bg-zinc-800/40 rounded-xl p-3 text-xs flex flex-wrap items-center justify-between gap-2 mb-4">
                     <div>
-                      <span className="text-slate-500">Your Answer: </span>
+                      <span className="text-zinc-400">Your Answer: </span>
                       <strong className={`font-mono text-sm ${isCorrect ? 'text-emerald-600' : 'text-rose-500'}`}>
                         {userAns || 'Not Attempted'}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-slate-500">Correct Answer: </span>
+                      <span className="text-zinc-400">Correct Answer: </span>
                       <strong className="font-mono text-sm text-emerald-600">
                         {q.correctAnswer}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-slate-500">Time Spent: </span>
-                      <strong className="font-mono text-slate-800 dark:text-slate-200">
+                      <span className="text-zinc-400">Time Spent: </span>
+                      <strong className="font-mono text-zinc-700 dark:text-zinc-300">
                         {formatSeconds(resp?.timeSpentSeconds || 0)}
                       </strong>
                     </div>
                   </div>
 
-                  {/* Step-by-Step Mathematical/Verbal Explanation */}
-                  <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
-                    <div className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide flex items-center space-x-1.5">
-                      <BookOpen size={13} className="text-blue-600" />
-                      <span>Detailed Conceptual Proof & Steps</span>
+                  {/* Step-by-Step Proof */}
+                  <div className="space-y-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 text-xs">
+                    <div className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wide flex items-center space-x-1.5">
+                      <BookOpen size={13} className="text-amber-500" />
+                      <span>Conceptual Solution Steps</span>
                     </div>
-                    <div className="space-y-1.5 text-slate-600 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="space-y-1.5 text-zinc-600 dark:text-zinc-300 bg-white dark:bg-zinc-900 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       {q.explanation.stepByStep.map((step, sIdx) => (
                         <MathRenderer key={sIdx} content={step} className="text-xs" />
                       ))}
                     </div>
 
-                    {/* IIM Alum Shortcut / 60-Second Tip */}
                     {q.explanation.shortcutOrAlumTip && (
-                      <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-lg text-amber-900 dark:text-amber-200">
+                      <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800/60 rounded-xl text-amber-900 dark:text-amber-200">
                         <div className="font-bold flex items-center space-x-1.5 mb-1 text-[11px] uppercase tracking-wider text-amber-800 dark:text-amber-300">
                           <Zap size={14} className="text-amber-600 fill-amber-500" />
                           <span>IIM Alum Speed Hack (Save 60-90s)</span>
@@ -530,12 +552,11 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                       </div>
                     )}
 
-                    {/* Trap Analysis */}
                     {q.explanation.trapAnalysis && (
-                      <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-lg text-rose-900 dark:text-rose-200">
+                      <div className="p-3.5 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/60 rounded-xl text-rose-900 dark:text-rose-200">
                         <div className="font-bold flex items-center space-x-1.5 mb-1 text-[11px] uppercase tracking-wider text-rose-700 dark:text-rose-400">
                           <AlertTriangle size={13} className="text-rose-600" />
-                          <span>Trap Alert & Distractor Deconstruction</span>
+                          <span>Distractor Trap Warning</span>
                         </div>
                         <MathRenderer content={q.explanation.trapAnalysis} className="text-xs" />
                       </div>
@@ -547,11 +568,11 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
           </div>
         </div>
 
-        {/* 4. Bottom Action Bar */}
+        {/* Footer Actions */}
         <div className="flex flex-wrap items-center justify-between gap-4 py-4">
           <button
             onClick={onRetake}
-            className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center space-x-2 shadow-sm"
+            className="px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 text-zinc-800 dark:text-zinc-200 font-bold text-xs flex items-center space-x-2 shadow-xs"
           >
             <RotateCcw size={14} />
             <span>Retake This Daily Sprint</span>
@@ -559,23 +580,23 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
 
           <button
             onClick={onBackToDashboard}
-            className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center space-x-2 shadow"
+            className="px-6 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-xs flex items-center space-x-2 shadow-sm"
           >
-            <span>Proceed to Dashboard</span>
+            <span>Back to Dashboard</span>
             <ArrowRight size={14} />
           </button>
         </div>
       </div>
 
-      {/* 5. Add to Mistake Book Modal */}
+      {/* Mistake Modal */}
       {mistakeModalQ && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl max-w-md w-full p-6 border border-zinc-200 dark:border-zinc-800">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-1">
               Log Question to Mistake Book
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Categorize why you got this question wrong to identify and fix your systematic blind spots.
+            <p className="text-xs text-zinc-500 mb-4">
+              Categorize the error so you can systematically eliminate this flaw.
             </p>
 
             <div className="space-y-2 mb-6">
@@ -589,14 +610,14 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                 <label
                   key={tag}
                   onClick={() => setSelectedMistakeTag(tag as MistakeEntry['mistakeTag'])}
-                  className={`flex items-center space-x-2 p-2.5 rounded-lg border text-xs cursor-pointer transition ${
+                  className={`flex items-center space-x-2 p-2.5 rounded-xl border text-xs cursor-pointer transition ${
                     selectedMistakeTag === tag
                       ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-500 font-bold text-amber-900 dark:text-amber-200'
-                      : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      : 'border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                    selectedMistakeTag === tag ? 'border-amber-600 bg-amber-600' : 'border-slate-400'
+                    selectedMistakeTag === tag ? 'border-amber-600 bg-amber-600' : 'border-zinc-400'
                   }`}>
                     {selectedMistakeTag === tag && <span className="w-1.5 h-1.5 rounded-full bg-white"></span>}
                   </span>
@@ -608,13 +629,13 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
             <div className="flex items-center justify-end space-x-3">
               <button
                 onClick={() => setMistakeModalQ(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-xs font-semibold"
+                className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleSaveToMistakeBook(mistakeModalQ)}
-                className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold shadow"
+                className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-sm"
               >
                 Save to Error Log
               </button>

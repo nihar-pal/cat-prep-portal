@@ -48,7 +48,7 @@ export const FormulaVaultModal: React.FC<FormulaVaultModalProps> = ({ isOpen, on
               onClick={() => setActiveCategoryIndex(idx)}
               className={`px-3.5 py-1.5 rounded-lg font-bold transition shrink-0 ${
                 idx === activeCategoryIndex
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
               }`}
             >
@@ -61,7 +61,7 @@ export const FormulaVaultModal: React.FC<FormulaVaultModalProps> = ({ isOpen, on
         <div className="flex-1 p-6 overflow-y-auto space-y-6">
           {currentCategory.subcategories.map((sub, sIdx) => (
             <div key={sIdx} className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-1 flex items-center space-x-1.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 border-b border-slate-200 dark:border-slate-800 pb-1 flex items-center space-x-1.5">
                 <ChevronRight size={14} />
                 <span>{sub.title}</span>
               </h3>

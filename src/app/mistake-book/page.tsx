@@ -90,7 +90,7 @@ export default function MistakeBookPage() {
               onClick={() => setSelectedTag(tag)}
               className={`px-3 py-1.5 rounded-lg font-semibold transition ${
                 selectedTag === tag
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
               }`}
             >
@@ -102,8 +102,8 @@ export default function MistakeBookPage() {
         {/* Empty State */}
         {filteredMistakes.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8">
-            <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center mx-auto mb-3">
-              <Bookmark size={24} />
+            <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center mx-auto mb-3">
+              <Bookmark size={24} className="text-amber-500" />
             </div>
             <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">No Mistake Logs Found</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
@@ -111,9 +111,9 @@ export default function MistakeBookPage() {
             </p>
             <Link
               href="/"
-              className="inline-block mt-4 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow"
+              className="inline-block mt-4 px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold shadow-sm"
             >
-              Attempt Today\'s Daily Target
+              Attempt Today's Daily Target
             </Link>
           </div>
         ) : (
@@ -221,7 +221,7 @@ export default function MistakeBookPage() {
                               key={opt.id}
                               onClick={() => setRetestAnswer(opt.id)}
                               className={`p-2 rounded border cursor-pointer flex items-center space-x-2 ${
-                                retestAnswer === opt.id ? 'bg-blue-600 text-white font-bold' : 'bg-white dark:bg-slate-800'
+                                retestAnswer === opt.id ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold' : 'bg-white dark:bg-slate-800'
                               }`}
                             >
                               <span>{opt.id}.</span>
@@ -243,7 +243,7 @@ export default function MistakeBookPage() {
                         <div className="flex space-x-2 pt-2">
                           <button
                             onClick={() => setRetestSubmitted(true)}
-                            className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-bold"
+                            className="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 rounded text-xs font-bold shadow-xs"
                           >
                             Verify
                           </button>
