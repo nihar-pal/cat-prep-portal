@@ -17,7 +17,9 @@ import {
   User,
   LogOut,
   Menu,
-  X
+  X,
+  CalendarCheck,
+  Archive
 } from 'lucide-react';
 import { ExamType } from '@/types/exam';
 import { EXAM_CONFIGS } from '@/data/multiExamConfigs';
@@ -47,7 +49,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  const exams: ExamType[] = ['CAT', 'XAT', 'NMAT', 'SNAP'];
+  const exams: ExamType[] = ['CAT', 'GMAT', 'XAT', 'NMAT', 'SNAP'];
+
   const activeConfig = EXAM_CONFIGS[currentExam];
 
   const openLogin = () => {
@@ -144,6 +147,31 @@ export const Navbar: React.FC<NavbarProps> = ({
               </Link>
 
               <Link
+                href="/planner"
+                className={`px-3 py-1.5 rounded-full transition flex items-center space-x-1.5 ${
+                  pathname.startsWith('/planner') 
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm' 
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900'
+                }`}
+              >
+                <CalendarCheck size={14} />
+                <span>Study Planner</span>
+              </Link>
+
+              <Link
+                href="/archives"
+                className={`px-3 py-1.5 rounded-full transition flex items-center space-x-1.5 ${
+                  pathname.startsWith('/archives') 
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm' 
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900'
+                }`}
+              >
+                <Archive size={14} />
+                <span>48h Archives</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              </Link>
+
+              <Link
                 href="/colleges"
                 className={`px-3 py-1.5 rounded-full transition flex items-center space-x-1.5 ${
                   pathname.startsWith('/colleges') 
@@ -153,7 +181,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Building2 size={14} />
                 <span>College Tracker</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
               </Link>
 
               <Link
@@ -201,9 +228,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <Sparkles size={14} className="text-amber-500" />
-                <span>AI Question Lab</span>
+                <span>AI Lab</span>
               </Link>
             </div>
+
 
             {/* Right Tools: Streak, Calculator, Auth Profile */}
             <div className="flex items-center space-x-2">
@@ -336,7 +364,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-1">
                 Select Active Exam
               </div>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-5 gap-1">
                 {exams.map(ex => (
                   <button
                     key={ex}
@@ -344,7 +372,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onSelectExam(ex);
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`py-1.5 text-center rounded-xl font-bold transition text-xs ${
+                    className={`py-1.5 text-center rounded-xl font-bold transition text-[11px] ${
                       ex === currentExam
                         ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
                         : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
@@ -364,9 +392,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               Daily Target Questions
             </Link>
             <Link
-              href="/colleges"
+              href="/planner"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold"
+            >
+              Study & Task Planner 📅
+            </Link>
+            <Link
+              href="/archives"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold"
+            >
+              48h Test Archives ⏱️
+            </Link>
+            <Link
+              href="/colleges"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900"
             >
               College Application Tracker 🎓
             </Link>
@@ -399,6 +441,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               AI Question Lab
             </Link>
           </div>
+
         )}
       </nav>
 

@@ -3,6 +3,8 @@ import { CAT_DAILY_TARGETS } from '@/data/catDailyTargets';
 import { XAT_DAILY_TARGETS } from '@/data/xatDailyTargets';
 import { NMAT_DAILY_TARGETS } from '@/data/nmatDailyTargets';
 import { SNAP_DAILY_TARGETS } from '@/data/snapDailyTargets';
+import { GMAT_DAILY_TARGETS } from '@/data/gmatDailyTargets';
+
 
 export interface ExamSectionInfo {
   type: SectionType;
@@ -117,11 +119,39 @@ export const EXAM_SECTION_CONFIGS: Record<ExamType, ExamSectionInfo[]> = {
       accentColor: 'emerald',
       description: 'Speed arithmetic, Trains & Platforms, Perpendicular lines & Quick DI tables.'
     }
+  ],
+  GMAT: [
+    {
+      type: 'Quantitative_Reasoning',
+      label: 'Quantitative Reasoning',
+      shortLabel: 'Quant',
+      badgeColor: 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800',
+      accentColor: 'emerald',
+      description: 'Pure Problem Solving (Number properties, Rates & Work, Overlapping sets; No geometry; No calculator).'
+    },
+    {
+      type: 'Verbal_Reasoning',
+      label: 'Verbal Reasoning',
+      shortLabel: 'Verbal',
+      badgeColor: 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800',
+      accentColor: 'amber',
+      description: 'Critical Reasoning (Bold-face roles, Assumptions, Weaken) and Academic Reading Comprehension.'
+    },
+    {
+      type: 'Data_Insights',
+      label: 'Data Insights',
+      shortLabel: 'Data Insights',
+      badgeColor: 'text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700',
+      accentColor: 'zinc',
+      description: 'Data Sufficiency (5-choice protocol), Multi-Source Reasoning, Two-Part Analysis (Calculator permitted).'
+    }
   ]
 };
 
 export function getDailyTargetsForExam(exam: ExamType): DailyTarget[] {
   switch (exam) {
+    case 'GMAT':
+      return GMAT_DAILY_TARGETS;
     case 'XAT':
       return XAT_DAILY_TARGETS;
     case 'NMAT':
@@ -133,6 +163,7 @@ export function getDailyTargetsForExam(exam: ExamType): DailyTarget[] {
       return CAT_DAILY_TARGETS;
   }
 }
+
 
 export function getAllMockQuestionsForExam(exam: ExamType): Question[] {
   const targets = getDailyTargetsForExam(exam);

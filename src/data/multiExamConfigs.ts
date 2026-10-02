@@ -225,5 +225,54 @@ export const EXAM_CONFIGS: Record<ExamType, ExamConfig> = {
       { percentile: '90.0 %ile', scoreRange: '34 - 37 marks', description: 'SIIB, SIBM Bangalore, SIOM' }
     ],
     strategyTip: 'Speed is king! 1 question per minute. Skip lengthy puzzles immediately and harvest direct 10-second grammar and quant questions.'
+  },
+  GMAT: {
+    id: 'GMAT',
+    name: 'GMAT Focus',
+    fullName: 'GMAT Focus Edition',
+    conductingBody: 'Graduate Management Admission Council (GMAC)',
+    targetColleges: ['ISB Hyderabad & Mohali', 'IIM Ahmedabad (PGPX)', 'IIM Bangalore (EPGP)', 'IIM Calcutta (MBAEx)', 'INSEAD', 'Harvard / Stanford / Wharton', 'London Business School (LBS)'],
+    totalQuestions: 64,
+    totalDurationMinutes: 135,
+    hasSectionalTimer: true,
+    allowSectionSwitching: false,
+    hasCalculator: true, // For Data Insights only
+    scoring: {
+      correctMcq: 3,
+      incorrectMcq: -1,
+      correctTita: 3,
+      incorrectTita: 0
+    },
+    sections: [
+      {
+        type: 'Quantitative_Reasoning',
+        label: 'Quantitative Reasoning',
+        questionsCount: 21,
+        durationMinutes: 45,
+        description: 'Pure Problem Solving (Arithmetic, Algebra, Number Properties, Overlapping Sets; No Geometry; Calculators not allowed)'
+      },
+      {
+        type: 'Verbal_Reasoning',
+        label: 'Verbal Reasoning',
+        questionsCount: 23,
+        durationMinutes: 45,
+        description: 'Critical Reasoning (Strengthen, Weaken, Assumptions, Bold-Face) and Reading Comprehension (Academic/Business Passages)'
+      },
+      {
+        type: 'Data_Insights',
+        label: 'Data Insights',
+        questionsCount: 20,
+        durationMinutes: 45,
+        description: 'Data Sufficiency (5 standard options), Multi-Source Reasoning, Two-Part Analysis & Graph Interpretation (Calculator permitted)'
+      }
+    ],
+    percentileBenchmarks: [
+      { percentile: '705+ (99th %ile)', scoreRange: '705 - 805 Scale', description: 'M7 Global B-Schools (HBS/Stanford/Wharton) & ISB top scholarship zone' },
+      { percentile: '655 - 695 (90-98th %ile)', scoreRange: '655 - 695 Scale', description: 'ISB, IIM Executive 1-yr MBA, INSEAD, LBS shortlist tier' },
+      { percentile: '605 - 645 (75-88th %ile)', scoreRange: '605 - 645 Scale', description: 'Leading US & European specialized Master in Management (MiM) programs' },
+      { percentile: '555 - 595 (50-70th %ile)', scoreRange: '555 - 595 Scale', description: 'Solid competitive baseline for international universities' }
+    ],
+    strategyTip: 'Every question counts equally across sections in GMAT Focus! You can bookmark and review/edit up to 3 answers per section before time runs out.'
   }
 };
+

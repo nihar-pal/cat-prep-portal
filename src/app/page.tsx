@@ -8,6 +8,7 @@ import { PerformanceSummary } from '@/components/Analytics/PerformanceSummary';
 import { FormulaVaultModal } from '@/components/FormulaVaultModal';
 import { ExamType, DailyTarget, UserResponse, Question } from '@/types/exam';
 import { useRouter } from 'next/navigation';
+import { saveTestToArchive } from '@/utils/archiveStorage';
 
 export default function HomePage() {
   const router = useRouter();
@@ -49,6 +50,18 @@ export default function HomePage() {
   };
 
   const handleFinishTest = (responses: Record<string, UserResponse>, totalTimeSpentSeconds: number) => {
+    try {
+      saveTestToArchive({
+        testTitle: activeSession.title,
+        exam: currentExam,
+        questions: activeSession.questions,
+        responses,
+        totalTimeSeconds: totalTimeSpentSeconds
+      });
+    } catch (e) {
+      console.error('Failed to auto-archive test:', e);
+    }
+
     setActiveSession(prev => ({
       ...prev,
       isRunning: false,
@@ -57,6 +70,7 @@ export default function HomePage() {
       totalTimeSpentSeconds
     }));
   };
+
 
   // If a test is active, show the authentic TCS iON test screen
   if (activeSession.isRunning) {

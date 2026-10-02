@@ -1,4 +1,4 @@
-export type ExamType = 'CAT' | 'XAT' | 'NMAT' | 'SNAP';
+export type ExamType = 'CAT' | 'XAT' | 'NMAT' | 'SNAP' | 'GMAT';
 
 export type SectionType = 
   | 'VARC' 
@@ -16,7 +16,11 @@ export type SectionType =
   // SNAP specific
   | 'General_English' 
   | 'Analytical_Reasoning' 
-  | 'Quant_DI_DS';
+  | 'Quant_DI_DS'
+  // GMAT Focus specific
+  | 'Quantitative_Reasoning'
+  | 'Verbal_Reasoning'
+  | 'Data_Insights';
 
 export type QuestionType = 'MCQ' | 'TITA';
 
@@ -139,3 +143,31 @@ export interface MistakeEntry {
   dateAdded: string;
   resolved: boolean;
 }
+
+export interface ArchivedTestSession {
+  id: string;
+  testTitle: string;
+  exam: ExamType;
+  completedAt: string; // ISO string
+  expiresAt: string;   // ISO string (48 hours after completion)
+  totalTimeSeconds: number;
+  totalScore: number;
+  maxScore: number;
+  accuracy: number;
+  percentileEstimate: number;
+  totalQuestions: number;
+  attemptedQuestions: number;
+  correctCount: number;
+  wrongCount: number;
+  sectionScores?: Record<string, {
+    score: number;
+    attempted: number;
+    correct: number;
+    wrong: number;
+    accuracy: number;
+    timeSpentSeconds: number;
+  }>;
+  responses: Record<string, UserResponse>;
+  questions: Question[];
+}
+

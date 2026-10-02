@@ -19,6 +19,7 @@ import { getAllMockQuestionsForExam, EXAM_SECTION_CONFIGS } from '@/data/examTar
 import { CatExamInterface } from '@/components/TestEngine/CatExamInterface';
 import { PerformanceSummary } from '@/components/Analytics/PerformanceSummary';
 import { Navbar } from '@/components/Navbar';
+import { saveTestToArchive } from '@/utils/archiveStorage';
 
 export default function MockTestPage() {
   const [currentExam, setCurrentExam] = useState<ExamType>('CAT');
@@ -55,6 +56,18 @@ export default function MockTestPage() {
   };
 
   const handleFinishTest = (responses: Record<string, UserResponse>, totalTimeSpentSeconds: number) => {
+    try {
+      saveTestToArchive({
+        testTitle: activeSession.title,
+        exam: currentExam,
+        questions: activeSession.questions,
+        responses,
+        totalTimeSeconds: totalTimeSpentSeconds
+      });
+    } catch (e) {
+      console.error('Failed to auto-archive mock test:', e);
+    }
+
     setActiveSession(prev => ({
       ...prev,
       isRunning: false,
@@ -63,6 +76,7 @@ export default function MockTestPage() {
       totalTimeSpentSeconds
     }));
   };
+
 
   if (activeSession.isRunning) {
     return (

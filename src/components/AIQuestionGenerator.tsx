@@ -53,8 +53,14 @@ export const AIQuestionGenerator: React.FC = () => {
       { value: 'General_English', label: 'General English' },
       { value: 'Analytical_Reasoning', label: 'Analytical & Logical Reasoning' },
       { value: 'Quant_DI_DS', label: 'Quantitative, DI & DS' }
+    ],
+    GMAT: [
+      { value: 'Quantitative_Reasoning', label: 'Quantitative Reasoning (PS)' },
+      { value: 'Verbal_Reasoning', label: 'Verbal Reasoning (CR & RC)' },
+      { value: 'Data_Insights', label: 'Data Insights (DS & IR)' }
     ]
   };
+
 
   const topicOptions: Record<string, string[]> = {
     QA: [
@@ -136,8 +142,30 @@ export const AIQuestionGenerator: React.FC = () => {
       'Successive Percentage Discounts Multipliers',
       '3D Sphere Melting & Recasting Volume Scaling',
       'Rapid Financial Table Percentage Growth'
+    ],
+    Quantitative_Reasoning: [
+      'Prime Factorization & Trailing Zeroes',
+      'Harmonic Work-Rate Equations',
+      'Absolute Value Squaring Intervals',
+      'Overlapping Sets & Double Matrix',
+      'Quadratic Inequalities & Intervals'
+    ],
+    Verbal_Reasoning: [
+      'Critical Reasoning (Bold-Face Role Analysis)',
+      'Critical Reasoning (Assumption Negation Test)',
+      'Critical Reasoning (Causal Weaken & Confounder)',
+      'Reading Comprehension (Academic Economics)',
+      'Reading Comprehension (Cognitive Science)'
+    ],
+    Data_Insights: [
+      'Data Sufficiency (5-Option Standard Protocol)',
+      'Data Sufficiency (Integer Parity & Divisibility)',
+      'Two-Part Analysis (Break-Even & Contribution)',
+      'Table Analysis (Multi-Criteria Ratios)',
+      'Multi-Source Reasoning (Synthesizing Tabs)'
     ]
   };
+
 
   const handleExamChange = (newExam: ExamType) => {
     setExam(newExam);
