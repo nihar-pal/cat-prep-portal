@@ -830,12 +830,46 @@ export const CatExamInterface: React.FC<CatExamInterfaceProps> = ({
                   </span>
                 </div>
 
-                <div className="text-xs text-slate-500 font-mono">
-                  {currentQuestion?.type === 'MCQ' 
-                    ? `+${examConfig.scoring.correctMcq}, ${examConfig.scoring.incorrectMcq}` 
-                    : `+${examConfig.scoring.correctTita}, 0`}
+                <div className="flex items-center space-x-3">
+                  {/* Time Pacer Indicator */}
+                  {currentQuestion && (() => {
+                    const timeSpent = responses[currentQuestion.id]?.timeSpentSeconds || 0;
+                    const mins = Math.floor(timeSpent / 60);
+                    const secs = timeSpent % 60;
+                    const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+                    if (timeSpent < 90) {
+                      return (
+                        <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          <Clock size={11} />
+                          <span>{timeStr} &bull; Optimal Pace</span>
+                        </span>
+                      );
+                    } else if (timeSpent <= 150) {
+                      return (
+                        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                          <Clock size={11} />
+                          <span>{timeStr} &bull; Decide or Move</span>
+                        </span>
+                      );
+                    } else {
+                      return (
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 animate-pulse">
+                          <AlertTriangle size={11} />
+                          <span>{timeStr} &bull; ⚠️ Topper 2.5m Skip Rule</span>
+                        </span>
+                      );
+                    }
+                  })()}
+
+                  <div className="text-xs text-slate-500 font-mono">
+                    {currentQuestion?.type === 'MCQ' 
+                      ? `+${examConfig.scoring.correctMcq}, ${examConfig.scoring.incorrectMcq}` 
+                      : `+${examConfig.scoring.correctTita}, 0`}
+                  </div>
                 </div>
               </div>
+
 
               {/* Question Stem */}
               <div className="mb-6">

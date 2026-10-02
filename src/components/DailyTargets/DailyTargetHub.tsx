@@ -19,7 +19,9 @@ import {
   BrainCircuit,
   Compass,
   Building2,
-  UserCheck
+  UserCheck,
+  Brain,
+  Gauge
 } from 'lucide-react';
 import { DailyTarget, ExamType, Question, SectionType } from '@/types/exam';
 import { EXAM_CONFIGS } from '@/data/multiExamConfigs';
@@ -208,7 +210,94 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
         </div>
       </div>
 
-      {/* 4. Quick Actions Grid: College Tracker, Profile Evaluator, AI Lab, Mistake Log */}
+      {/* 4. Competitive Edge Mastery Suite: Score Predictor, Flashcards SRS, RC Pacer */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              Competitive Edge Mastery Suite
+            </h3>
+          </div>
+          <span className="text-[11px] text-slate-400 font-medium">Topper-Grade Preparation Labs</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Score & College Predictor */}
+          <Link
+            href="/score-predictor"
+            className="p-5 rounded-3xl border border-amber-300 dark:border-amber-800/60 bg-gradient-to-br from-amber-50/70 to-amber-100/30 dark:from-amber-950/20 dark:to-slate-900 hover:border-amber-500 transition group shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-105 transition-transform">
+                <TrendingUp size={20} />
+              </div>
+              <div className="flex items-center space-x-1.5 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Empirical Normalization</span>
+                <span className="text-[9px] bg-amber-200 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 font-bold px-1.5 py-0.5 rounded-full">New</span>
+              </div>
+              <h4 className="font-black text-base text-slate-900 dark:text-white">Score & College Predictor</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                Empirical score-to-percentile curves for {currentExam} & live Tier-1 interview call radar across IIMs, XLRI & FMS.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-amber-200/60 dark:border-amber-800/30 text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center justify-between">
+              <span>Predict My Percentile</span>
+              <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </div>
+          </Link>
+
+          {/* Active Recall SRS Flashcards */}
+          <Link
+            href="/flashcards"
+            className="p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-amber-400/60 transition group shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-amber-500 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Brain size={20} />
+              </div>
+              <div className="flex items-center space-x-1.5 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Leitner System</span>
+                <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold px-1.5 py-0.5 rounded-full">SRS</span>
+              </div>
+              <h4 className="font-black text-base text-slate-900 dark:text-white">Active Recall Flashcards</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                High-yield geometry proofs, number theory invariants, SNAP vocab, and GMAT critical reasoning fallacies.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+              <span>Review Flashcard Decks</span>
+              <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </div>
+          </Link>
+
+          {/* RC Reading Speed Pacer */}
+          <Link
+            href="/rc-pacer"
+            className="p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-amber-400/60 transition group shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-indigo-500 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Gauge size={20} />
+              </div>
+              <div className="flex items-center space-x-1.5 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Speed & Retention</span>
+                <span className="text-[9px] bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold px-1.5 py-0.5 rounded-full">200-350 WPM</span>
+              </div>
+              <h4 className="font-black text-base text-slate-900 dark:text-white">RC Reading Speed Pacer</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Dynamic eye-tracking pacer for dense academic passages with authentic post-reading comprehension checks.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+              <span>Train Reading Speed</span>
+              <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* 5. Additional Practice & Tracking Tools */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* College Application Tracker Callout */}
         <Link

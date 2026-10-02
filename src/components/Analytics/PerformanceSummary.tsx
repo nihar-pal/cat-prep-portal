@@ -17,9 +17,13 @@ import {
   Zap, 
   Filter, 
   Check,
-  Bot
+  Bot,
+  Printer,
+  Download,
+  Share2
 } from 'lucide-react';
 import { Question, UserResponse, ExamType, MistakeEntry } from '@/types/exam';
+
 import { EXAM_CONFIGS } from '@/data/multiExamConfigs';
 import { MathRenderer } from '@/components/MathRenderer';
 import { PostSubmissionAiCoach } from '@/components/Chat/PostSubmissionAiCoach';
@@ -201,13 +205,26 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
           >
             <span>&larr; Back to Dashboard</span>
           </button>
+          
           <div className="flex items-center space-x-2">
-            <CuteCatLogo size={20} />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800">
-              {examType} Diagnostic Scorecard
-            </span>
+            <button
+              onClick={() => window.print()}
+              className="px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-bold text-zinc-700 dark:text-zinc-300 transition flex items-center space-x-1.5"
+              title="Print or Save PDF Scorecard"
+            >
+              <Printer size={13} />
+              <span>Print Scorecard</span>
+            </button>
+
+            <div className="flex items-center space-x-1.5">
+              <CuteCatLogo size={20} />
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800">
+                {examType} Diagnostic Scorecard
+              </span>
+            </div>
           </div>
         </div>
+
 
         {/* 1. Hero Scorecard - Minimalist Dark Charcoal / Warm Zinc (Non-bluish) */}
         <div className="bg-zinc-900 text-zinc-100 rounded-3xl p-6 sm:p-8 shadow-sm border border-zinc-800 relative overflow-hidden">
@@ -522,27 +539,52 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                     </div>
                   )}
 
-                  {/* Summary Bar */}
-                  <div className="bg-zinc-100/70 dark:bg-zinc-800/40 rounded-xl p-3 text-xs flex flex-wrap items-center justify-between gap-2 mb-4">
-                    <div>
-                      <span className="text-zinc-400">Your Answer: </span>
-                      <strong className={`font-mono text-sm ${isCorrect ? 'text-emerald-600' : 'text-rose-500'}`}>
-                        {userAns || 'Not Attempted'}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-zinc-400">Correct Answer: </span>
-                      <strong className="font-mono text-sm text-emerald-600">
-                        {q.correctAnswer}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-zinc-400">Time Spent: </span>
-                      <strong className="font-mono text-zinc-700 dark:text-zinc-300">
-                        {formatSeconds(resp?.timeSpentSeconds || 0)}
-                      </strong>
-                    </div>
-                  </div>
+                  {/* Summary Bar with Topper Benchmarking */}
+                  {(() => {
+                    const timeSpent = resp?.timeSpentSeconds || 0;
+                    const topperSecs = q.difficulty === 'Moderate' ? 75 : q.difficulty === 'Hard' ? 110 : 135;
+                    const isTimeOptimal = timeSpent > 0 && timeSpent <= topperSecs;
+                    const isTimeExcess = timeSpent > 150;
+
+                    return (
+                      <div className="bg-zinc-100/70 dark:bg-zinc-800/40 rounded-xl p-3 text-xs flex flex-wrap items-center justify-between gap-3 mb-4 border border-zinc-200/50 dark:border-zinc-700/50">
+                        <div>
+                          <span className="text-zinc-400">Your Answer: </span>
+                          <strong className={`font-mono text-sm ${isCorrect ? 'text-emerald-600' : 'text-rose-500'}`}>
+                            {userAns || 'Not Attempted'}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span className="text-zinc-400">Correct Answer: </span>
+                          <strong className="font-mono text-sm text-emerald-600">
+                            {q.correctAnswer}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span className="text-zinc-400">Your Time: </span>
+                          <strong className="font-mono text-zinc-700 dark:text-zinc-300">
+                            {formatSeconds(timeSpent)}
+                          </strong>
+                        </div>
+
+                        <div className="flex items-center space-x-1.5 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                          <span className="text-[10px] text-zinc-400 uppercase font-bold">Toppers Benchmark:</span>
+                          <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
+                            ~{formatSeconds(topperSecs)}
+                          </span>
+                          {isTimeOptimal && (
+                            <span className="text-[10px] text-emerald-600 font-bold ml-1">⚡ Fast</span>
+                          )}
+                          {isTimeExcess && (
+                            <span className="text-[10px] text-rose-500 font-bold ml-1">⚠️ Slow</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
 
                   {/* Step-by-Step Proof */}
                   <div className="space-y-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 text-xs">
