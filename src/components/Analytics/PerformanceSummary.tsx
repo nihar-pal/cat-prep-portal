@@ -108,6 +108,15 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
     };
   });
 
+  // XAT Unattempted Question Penalty (Official rule: first 8 skips free; -0.10 thereafter)
+  let unattemptedPenaltyDeduction = 0;
+  if (examType === 'XAT' && unattemptedCount > 8) {
+    unattemptedPenaltyDeduction = Number(((unattemptedCount - 8) * 0.10).toFixed(2));
+    totalScore = Number((totalScore - unattemptedPenaltyDeduction).toFixed(2));
+  } else {
+    totalScore = Number(totalScore.toFixed(2));
+  }
+
   const attemptedCount = correctCount + wrongCount;
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
   const maxPossibleScore = questions.reduce((acc, q) => acc + examConfig.scoring.correctMcq, 0);
@@ -210,7 +219,12 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">{title}</h1>
               <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                Evaluated under official {examType} marking (+{examConfig.scoring.correctMcq} / {examConfig.scoring.incorrectMcq})
+                Evaluated under official {examType} marking (+{examConfig.scoring.correctMcq} / {examConfig.scoring.incorrectMcq === 0 ? '0' : examConfig.scoring.incorrectMcq})
+                {unattemptedPenaltyDeduction > 0 && (
+                  <span className="block text-amber-400 text-xs font-semibold mt-0.5">
+                    &bull; Includes XAT unattempted penalty of -{unattemptedPenaltyDeduction} marks ({unattemptedCount - 8} skips beyond 8 allowed).
+                  </span>
+                )}
               </p>
             </div>
 
@@ -303,7 +317,7 @@ export const PerformanceSummary: React.FC<PerformanceSummaryProps> = ({
                   const secAcc = stats.attempted > 0 ? Math.round((stats.correct / stats.attempted) * 100) : 0;
                   return (
                     <tr key={sec} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                      <td className="py-3 px-4 font-bold text-zinc-900 dark:text-white">{sec}</td>
+                      <td className="py-3 px-4 font-bold text-zinc-900 dark:text-white">{sec.replace(/_/g, ' ')}</td>
                       <td className="py-3 px-4">{stats.attempted} / {stats.total}</td>
                       <td className="py-3 px-4 text-emerald-600 font-semibold">{stats.correct}</td>
                       <td className="py-3 px-4 text-rose-500 font-semibold">{stats.wrong}</td>

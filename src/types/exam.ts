@@ -68,6 +68,13 @@ export interface CaseletSet {
   questions: Question[];
 }
 
+export interface SectionBreakdownItem {
+  section: SectionType;
+  label: string;
+  count: number;
+  description: string;
+}
+
 export interface DailyTarget {
   id: string;
   dayNumber: number;
@@ -76,10 +83,12 @@ export interface DailyTarget {
   description: string;
   estimatedMinutes: number;
   exam: ExamType;
-  sections: {
-    varcCount: number;
-    dilrCount: number;
-    qaCount: number;
+  sectionBreakdown?: SectionBreakdownItem[];
+  sections?: {
+    varcCount?: number;
+    dilrCount?: number;
+    qaCount?: number;
+    [key: string]: number | undefined;
   };
   questions: Question[];
 }

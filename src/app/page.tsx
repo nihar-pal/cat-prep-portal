@@ -42,7 +42,7 @@ export default function HomePage() {
     setActiveSession({
       isRunning: true,
       isFinished: false,
-      title: `${target.title}${filterSection ? ` (${filterSection} Sprint)` : ''}${isTimed ? '' : ' - Practice Mode'}`,
+      title: `${target.title}${filterSection ? ` (${filterSection.replace(/_/g, ' ')} Sprint)` : ''}${isTimed ? '' : ' - Practice Mode'}`,
       questions: targetQuestions,
       durationMinutes: duration
     });

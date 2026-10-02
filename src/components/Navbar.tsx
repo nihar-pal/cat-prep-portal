@@ -330,7 +330,32 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Navigation Dropdown */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 px-4 pt-2 pb-4 space-y-2 text-xs">
+          <div className="lg:hidden bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 px-4 pt-3 pb-4 space-y-2 text-xs">
+            {/* Mobile Exam Switcher */}
+            <div className="pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-1">
+                Select Active Exam
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {exams.map(ex => (
+                  <button
+                    key={ex}
+                    onClick={() => {
+                      onSelectExam(ex);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`py-1.5 text-center rounded-xl font-bold transition text-xs ${
+                      ex === currentExam
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}

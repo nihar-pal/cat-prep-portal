@@ -135,7 +135,7 @@ export default function MistakeBookPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <div className="flex items-center space-x-2">
                       <span className="font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-0.5 rounded">
-                        {q.section} &bull; {q.topic}
+                        {q.section?.replace(/_/g, ' ')} &bull; {q.topic}
                       </span>
                       <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
                         {entry.mistakeTag}

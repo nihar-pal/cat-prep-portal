@@ -361,7 +361,7 @@ export const CatExamInterface: React.FC<CatExamInterfaceProps> = ({
                     : 'bg-slate-900/60 hover:bg-slate-700 text-slate-300'
                 }`}
               >
-                <span>{sec.section}</span>
+                <span>{sec.section.replace(/_/g, ' ')}</span>
                 <span className="text-[10px] px-1.5 py-0.2 bg-black/30 rounded-full font-mono">
                   {sec.questions.length}
                 </span>
@@ -371,7 +371,7 @@ export const CatExamInterface: React.FC<CatExamInterfaceProps> = ({
         </div>
 
         <div className="hidden md:flex items-center space-x-3 text-slate-400 text-[11px]">
-          <span>Current Section: <strong className="text-white">{currentSection?.section}</strong></span>
+          <span>Current Section: <strong className="text-white">{currentSection?.section?.replace(/_/g, ' ')}</strong></span>
           <span>&bull;</span>
           <span>Question <strong>{currentQIndex + 1}</strong> of <strong>{sectionQuestions.length}</strong></span>
         </div>

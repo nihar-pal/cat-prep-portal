@@ -21,9 +21,9 @@ import {
   Building2,
   UserCheck
 } from 'lucide-react';
-import { DailyTarget, ExamType, Question } from '@/types/exam';
-import { CAT_DAILY_TARGETS } from '@/data/catDailyTargets';
+import { DailyTarget, ExamType, Question, SectionType } from '@/types/exam';
 import { EXAM_CONFIGS } from '@/data/multiExamConfigs';
+import { getDailyTargetsForExam, EXAM_SECTION_CONFIGS } from '@/data/examTargets';
 import { CuteCatLogo } from '@/components/CuteCatLogo';
 
 interface DailyTargetHubProps {
@@ -40,8 +40,21 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
   onOpenFormulaVault
 }) => {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
-  const activeTarget = CAT_DAILY_TARGETS[selectedDayIndex] || CAT_DAILY_TARGETS[0];
-  const examConfig = EXAM_CONFIGS[currentExam];
+  const targets = React.useMemo(() => getDailyTargetsForExam(currentExam), [currentExam]);
+  const safeDayIndex = selectedDayIndex >= targets.length ? 0 : selectedDayIndex;
+  const activeTarget = targets[safeDayIndex] || targets[0];
+  const examConfig = EXAM_CONFIGS[currentExam] || EXAM_CONFIGS.CAT;
+  const sectionConfigs = EXAM_SECTION_CONFIGS[currentExam] || [];
+
+  const sectionCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (activeTarget?.questions) {
+      activeTarget.questions.forEach(q => {
+        counts[q.section] = (counts[q.section] || 0) + 1;
+      });
+    }
+    return counts;
+  }, [activeTarget]);
 
   return (
     <div className="space-y-8 font-sans">
@@ -57,7 +70,7 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
               Daily Target Sprint &bull; Day {activeTarget.dayNumber}
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
-              Curated to mirror CAT IIM standards: 1 RC Passage, 1 DILR Caselet, and 5 QA Questions with genuine option traps, TITA numerical inputs, and IIM alum shortcuts.
+              Curated to mirror authentic {currentExam} standards: {examConfig.fullName} pattern with exam-calibrated sections, option traps, and timing.
             </p>
 
             {/* Target Strategy Capsule */}
@@ -75,9 +88,17 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
             <div>
               <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Marking Scheme</div>
               <div className="text-lg font-black text-emerald-400 font-mono mt-0.5">
-                +{examConfig.scoring.correctMcq} / {examConfig.scoring.incorrectMcq}
+                +{examConfig.scoring.correctMcq} / {examConfig.scoring.incorrectMcq === 0 ? '0' : examConfig.scoring.incorrectMcq}
               </div>
-              <div className="text-[10px] text-slate-400">TITA: +{examConfig.scoring.correctTita}, 0 penalty</div>
+              <div className="text-[10px] text-slate-400">
+                {currentExam === 'NMAT' 
+                  ? 'No Negative Marking!' 
+                  : currentExam === 'XAT'
+                  ? 'Unattempted: -0.10 after 8 Qs'
+                  : currentExam === 'SNAP'
+                  ? 'Speed: 60 Qs in 60m'
+                  : `TITA: +${examConfig.scoring.correctTita}, 0 penalty`}
+              </div>
             </div>
 
             <div className="border-l md:border-l-0 md:border-t border-slate-800 pl-4 md:pl-0 md:pt-3">
@@ -93,8 +114,8 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
 
       {/* 2. Day Selector Tabs */}
       <div className="flex items-center space-x-2.5 overflow-x-auto pb-1 text-xs">
-        {CAT_DAILY_TARGETS.map((target, idx) => {
-          const isSelected = idx === selectedDayIndex;
+        {targets.map((target, idx) => {
+          const isSelected = idx === safeDayIndex;
           return (
             <button
               key={target.id}
@@ -146,81 +167,44 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
               className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs flex items-center space-x-2 shadow-sm transition"
             >
               <Play size={14} className="fill-current" />
-              <span>Start Timed CAT Sprint ({activeTarget.estimatedMinutes}m)</span>
+              <span>Start Timed {currentExam} Sprint ({activeTarget.estimatedMinutes}m)</span>
             </button>
           </div>
         </div>
 
-        {/* Section Breakdown Pills */}
+        {/* Dynamic Section Breakdown Pills */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          {/* VARC */}
-          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold uppercase text-[10px] text-blue-600 dark:text-blue-400">VARC Section</span>
-                <span className="font-mono font-bold text-slate-400">{activeTarget.sections.varcCount} Qs</span>
+          {sectionConfigs.map(sec => {
+            const count = sectionCounts[sec.type] || 0;
+            return (
+              <div 
+                key={sec.type}
+                className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`font-bold uppercase text-[10px] px-2 py-0.5 rounded-full border ${sec.badgeColor}`}>
+                      {sec.shortLabel} Section
+                    </span>
+                    <span className="font-mono font-bold text-slate-400">{count} Qs</span>
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1.5">
+                    {sec.label}
+                  </h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
+                    {sec.description}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onStartTarget(activeTarget, true, sec.type)}
+                  className="mt-4 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 flex items-center space-x-1 transition"
+                >
+                  <span>Attempt {sec.shortLabel} Sprint ({count} Qs)</span>
+                  <ChevronRight size={13} />
+                </button>
               </div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1.5">
-                RC Passage & Verbal Ability
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-                Dense analytical reading comprehension, inference traps, TITA 4-sentence Para Jumble, and Para Summary.
-              </p>
-            </div>
-            <button
-              onClick={() => onStartTarget(activeTarget, true, 'VARC')}
-              className="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center space-x-1"
-            >
-              <span>Attempt VARC Sprint</span>
-              <ChevronRight size={13} />
-            </button>
-          </div>
-
-          {/* DILR */}
-          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold uppercase text-[10px] text-purple-600 dark:text-purple-400">DILR Section</span>
-                <span className="font-mono font-bold text-slate-400">{activeTarget.sections.dilrCount} Qs</span>
-              </div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1.5">
-                Logical Reasoning Caselet
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-                Tournament point matrices, constraint optimization puzzles, and numerical deductions.
-              </p>
-            </div>
-            <button
-              onClick={() => onStartTarget(activeTarget, true, 'DILR')}
-              className="mt-4 text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center space-x-1"
-            >
-              <span>Attempt DILR Sprint</span>
-              <ChevronRight size={13} />
-            </button>
-          </div>
-
-          {/* QA */}
-          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold uppercase text-[10px] text-amber-600 dark:text-amber-400">QA Section</span>
-                <span className="font-mono font-bold text-slate-400">{activeTarget.sections.qaCount} Qs</span>
-              </div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1.5">
-                Quantitative Aptitude Sprints
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-                Arithmetic relative speeds, quadratic polynomial roots, logarithmic inequalities, and Fermat remainders.
-              </p>
-            </div>
-            <button
-              onClick={() => onStartTarget(activeTarget, true, 'QA')}
-              className="mt-4 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
-            >
-              <span>Attempt QA Sprint</span>
-              <ChevronRight size={13} />
-            </button>
-          </div>
+            );
+          })}
         </div>
       </div>
 

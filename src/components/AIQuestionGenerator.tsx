@@ -33,6 +33,29 @@ export const AIQuestionGenerator: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [savedToMistakes, setSavedToMistakes] = useState(false);
 
+  const examSections: Record<ExamType, { value: string; label: string }[]> = {
+    CAT: [
+      { value: 'QA', label: 'Quantitative Aptitude (QA)' },
+      { value: 'VARC', label: 'Verbal & Reading Comp (VARC)' },
+      { value: 'DILR', label: 'Data Interpretation & LR (DILR)' }
+    ],
+    XAT: [
+      { value: 'DM', label: 'Decision Making (DM)' },
+      { value: 'VALR', label: 'Verbal & Logical Ability (VALR)' },
+      { value: 'QADI', label: 'Quantitative Ability & DI (QADI)' }
+    ],
+    NMAT: [
+      { value: 'Language_Skills', label: 'Language Skills' },
+      { value: 'Quantitative_Skills', label: 'Quantitative Skills' },
+      { value: 'Logical_Reasoning', label: 'Logical Reasoning' }
+    ],
+    SNAP: [
+      { value: 'General_English', label: 'General English' },
+      { value: 'Analytical_Reasoning', label: 'Analytical & Logical Reasoning' },
+      { value: 'Quant_DI_DS', label: 'Quantitative, DI & DS' }
+    ]
+  };
+
   const topicOptions: Record<string, string[]> = {
     QA: [
       'Time Speed Distance & Escalators',
@@ -60,8 +83,74 @@ export const AIQuestionGenerator: React.FC = () => {
     DM: [
       'Business Ethics & Whistleblowing',
       'Stakeholder Prioritization Dilemma',
-      'Environmental Compliance vs Profitability'
+      'Environmental Compliance vs Profitability',
+      'Employee Performance & Toxic Star Reprimand'
+    ],
+    VALR: [
+      'Bold-Face Argument Role Analysis',
+      'Philosophical & Socio-cultural Reading Comprehension',
+      'Contextual Vocabulary & Semantic Nuance',
+      'Logical Flaws in Arguments'
+    ],
+    QADI: [
+      'Cauchy Functional Equations',
+      'Data Sufficiency (Inequalities & Absolute Values)',
+      'Incircle & Circumcircle Properties',
+      'Arithmetico-Geometric Progressions (AGP)'
+    ],
+    Language_Skills: [
+      'Verbal Analogies (Relational Bridge)',
+      'Phrasal Prepositions & Collocations',
+      'Subject-Verb Concord & Proximity Rules',
+      'Contextual Vocabulary & Antonyms'
+    ],
+    Quantitative_Skills: [
+      'Permutations & Vowel Grouping Strings',
+      'Complementary Probability & Independent Events',
+      'Compound Interest vs Simple Interest (2-Yr Difference)',
+      'Data Sufficiency (Arithmetic Progression Properties)',
+      'Work & Efficiency Ratios'
+    ],
+    Logical_Reasoning: [
+      'Machine Input-Output Sequential Sorting',
+      'Categorical Syllogisms & Venn Overlaps',
+      'Coded Blood Relations & Gender Elimination',
+      'Implicit Assumptions vs Extreme Statements'
+    ],
+    General_English: [
+      'Figures of Speech (Oxymoron, Synecdoche, Metaphor)',
+      'Idioms & Phrases (Medieval & Classical Origins)',
+      'Latin Loan Words in Business English',
+      'Commonly Misspelled Double-Letter Words'
+    ],
+    Analytical_Reasoning: [
+      'Clocks Hand Angles & Angular Velocities',
+      'Gregorian Calendar Leap Years & Odd Days',
+      'Number Series (Cubes and Differences)',
+      'Cartesian Direction Sense & Displacement',
+      'Alphabet Shift & Numerical Ciphers'
+    ],
+    Quant_DI_DS: [
+      'Trains Passing Platforms & Relative Speed',
+      'Perpendicular Line Equations & Slopes',
+      'Successive Percentage Discounts Multipliers',
+      '3D Sphere Melting & Recasting Volume Scaling',
+      'Rapid Financial Table Percentage Growth'
     ]
+  };
+
+  const handleExamChange = (newExam: ExamType) => {
+    setExam(newExam);
+    const firstSec = examSections[newExam][0].value;
+    setSection(firstSec);
+    const firstTopic = (topicOptions[firstSec] || topicOptions.QA)[0];
+    setTopic(firstTopic);
+  };
+
+  const handleSectionChange = (newSec: string) => {
+    setSection(newSec);
+    const firstTopic = (topicOptions[newSec] || topicOptions.QA)[0];
+    setTopic(firstTopic);
   };
 
   const handleGenerate = async () => {
@@ -112,34 +201,30 @@ export const AIQuestionGenerator: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-amber-600 via-indigo-600 to-blue-700 text-white p-6 sm:p-8 rounded-2xl shadow-xl">
-        <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-amber-200 mb-2">
+      {/* Header Banner - Minimalist Dark Charcoal */}
+      <div className="bg-zinc-900 text-white p-6 sm:p-8 rounded-3xl shadow-sm border border-zinc-800">
+        <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-amber-400 mb-2">
           <Sparkles size={16} />
-          <span>IIM Blueprint AI Question Engine</span>
+          <span>Multi-Exam AI Question Engine</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-          Infinite CAT & Multi-Exam Question Lab
+          Infinite CAT, XAT, NMAT & SNAP Question Lab
         </h1>
-        <p className="text-slate-100 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-          Generate bespoke CAT, XAT, NMAT, and SNAP questions on any subtopic with authentic trapped distractors, detailed proofs, and 60-second IIM alum shortcut hacks.
+        <p className="text-zinc-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+          Generate bespoke questions calibrated to authentic exam formats: XAT Decision Making, NMAT speed arithmetic & reasoning, SNAP figures of speech, and CAT tricky logic traps.
         </p>
       </div>
 
       {/* Control Panel */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-5">
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
           {/* Exam */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase">Target Exam</label>
+            <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1.5 uppercase">Target Exam</label>
             <select
               value={exam}
-              onChange={e => {
-                const newExam = e.target.value as ExamType;
-                setExam(newExam);
-                setSection(newExam === 'XAT' ? 'DM' : 'QA');
-              }}
-              className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold"
+              onChange={e => handleExamChange(e.target.value as ExamType)}
+              className="w-full p-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 font-semibold"
             >
               <option value="CAT">CAT (IIMs)</option>
               <option value="XAT">XAT (XLRI)</option>
@@ -150,16 +235,15 @@ export const AIQuestionGenerator: React.FC = () => {
 
           {/* Section */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase">Section</label>
+            <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1.5 uppercase">Section</label>
             <select
               value={section}
-              onChange={e => setSection(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold"
+              onChange={e => handleSectionChange(e.target.value)}
+              className="w-full p-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 font-semibold"
             >
-              <option value="QA">Quantitative Aptitude (QA)</option>
-              <option value="VARC">Verbal & Reading Comp (VARC)</option>
-              <option value="DILR">Data Interpretation & LR (DILR)</option>
-              {exam === 'XAT' && <option value="DM">Decision Making (DM)</option>}
+              {(examSections[exam] || examSections.CAT).map(s => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
             </select>
           </div>
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Question, ExamType, SectionType, QuestionDifficulty, QuestionType } from '@/types/exam';
+import { getAllMockQuestionsForExam } from '@/data/examTargets';
 
 export async function POST(req: Request) {
   try {
@@ -17,19 +18,19 @@ export async function POST(req: Request) {
 
     if (apiKey) {
       try {
-        const prompt = `You are a legendary CAT (Common Admission Test) question creator and IIM Ahmedabad alumnus.
+        const optionCountRule = exam === 'XAT' ? '5 options (A, B, C, D, E)' : '4 options (A, B, C, D)';
+        const prompt = `You are a premier ${exam} question creator and elite MBA exam mentor.
 Create 1 very high-quality, authentic ${exam} question for section "${section}" on topic "${topic}".
 Difficulty: ${difficulty}.
-Question Type: ${type} (${type === 'MCQ' ? 'Multiple Choice Question with 4 options A, B, C, D' : 'Type In The Answer / Numerical response without options'}).
+Question Type: ${type} (${type === 'MCQ' ? `Multiple Choice Question with ${optionCountRule}` : 'Type In The Answer / Numerical response without options'}).
 
-CRITICAL CAT QUALITY RULES:
-1. CAT questions never test trivial formula plugging. They test conceptual depth, boundary conditions, and subtle logical traps.
-2. For QA: use realistic numbers with elegant algebraic or geometric simplifications. Use KaTeX notation (e.g. $x^2 - 4x + 3 = 0$, $\\frac{a}{b}$, $\\sqrt{n}$).
-3. For VARC: write dense, thought-provoking philosophical, economic, or anthropological texts with nuanced options where wrong choices suffer from extreme wording, scope shifts, or distortion.
-4. For DILR: create crisp logic constraints, tournament rules, or matrix puzzles with deductive elegance.
-5. Provide a detailed step-by-step mathematical or verbal proof.
-6. Provide an "IIM Alum Shortcut / 60-Second Hack" showing how a 99.9 percentile student solves it without brute force.
-7. Provide a "Trap Analysis" explaining which distractor students pick and why it is wrong.
+CRITICAL ${exam} FORMAT RULES:
+1. Questions must strictly reflect the official pattern of ${exam}. For XAT Decision Making, create authentic managerial/ethical trade-offs with 5 distinct nuanced options. For NMAT, emphasize speed-oriented modern math, vocabulary, or input-output deduction. For SNAP, focus on figures of speech, clock/calendar puzzles, or rapid arithmetic.
+2. For quantitative sections: use elegant algebraic or geometric simplifications with KaTeX math notation (e.g. $x^2 - 4x + 3 = 0$, $\\frac{a}{b}$, $\\sqrt{n}$).
+3. For verbal sections: craft nuanced options where wrong choices suffer from subtle scope shifts or distractor traps.
+4. Provide a detailed step-by-step proof/explanation.
+5. Provide a Speed Hack / Alum Shortcut showing how an elite 99+ percentile student solves it efficiently.
+6. Provide a "Trap Analysis" deconstructing common wrong choices.
 
 Return ONLY a valid JSON object matching this exact schema:
 {
@@ -232,6 +233,21 @@ where $x$ is a real number.`,
         pastYearReference: 'CAT 2022 Slot 1 (Football Points Table Deduction)'
       }
     };
+
+    // Multi-Exam Fallback: Look for authentic curated questions matching the requested exam and section
+    const examQuestions = getAllMockQuestionsForExam(exam as ExamType);
+    const matchingSectionQuestions = examQuestions.filter(q => q.section === section);
+    
+    if (matchingSectionQuestions.length > 0) {
+      // Return a matching question for this exam & section (with unique ID)
+      const selected = matchingSectionQuestions[Math.floor(Math.random() * matchingSectionQuestions.length)];
+      return NextResponse.json({ 
+        question: {
+          ...selected,
+          id: `gen-${exam.toLowerCase()}-${Date.now()}`
+        } 
+      });
+    }
 
     const key = section.startsWith('VARC') ? 'VARC' : section.startsWith('DILR') ? 'DILR' : topic.toLowerCase().includes('algebra') ? 'QA-Algebra' : 'QA-Arithmetic';
     const fallbackQuestion = dynamicBank[key] || dynamicBank['QA-Arithmetic'];
