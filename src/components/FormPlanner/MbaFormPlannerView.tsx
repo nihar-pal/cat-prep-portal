@@ -19,7 +19,6 @@ import {
   ArrowUpDown,
   CheckSquare,
   Square,
-  Users,
   RefreshCw,
   Copy,
   Check,
@@ -38,12 +37,8 @@ import {
   categorizeCollegeForPercentile 
 } from '@/data/formPlannerData';
 import { CuteCatLogo } from '@/components/CuteCatLogo';
-import { MockPercentileSubmission } from '@/app/api/mock-percentiles/route';
 
 export const MbaFormPlannerView: React.FC = () => {
-  // Active Tab: 'planner' | 'community'
-  const [activeTab, setActiveTab] = useState<'planner' | 'community'>('planner');
-
   // Candidate Profile State
   const [candidateName, setCandidateName] = useState('Aspirant');
   const [category, setCategory] = useState('General');
@@ -83,10 +78,6 @@ export const MbaFormPlannerView: React.FC = () => {
   const [examFilter, setExamFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'deadline' | 'cutoff' | 'feeAsc' | 'placements'>('deadline');
 
-  // Community Submissions State
-  const [communitySubmissions, setCommunitySubmissions] = useState<MockPercentileSubmission[]>([]);
-  const [communityStats, setCommunityStats] = useState<any>(null);
-  const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
   const [candidateId, setCandidateId] = useState<string>('');
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [lastSavedTime, setLastSavedTime] = useState<string>('');
@@ -94,27 +85,8 @@ export const MbaFormPlannerView: React.FC = () => {
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [hasCopiedPlan, setHasCopiedPlan] = useState(false);
 
-  // Load community submissions from backend
-  const fetchCommunitySubmissions = async () => {
-    setIsLoadingCommunity(true);
-    try {
-      const res = await fetch('/api/mock-percentiles');
-      const data = await res.json();
-      if (data.success) {
-        setCommunitySubmissions(data.submissions || []);
-        setCommunityStats(data.stats || null);
-      }
-    } catch (err) {
-      console.error('Error fetching mock percentiles:', err);
-    } finally {
-      setIsLoadingCommunity(false);
-    }
-  };
-
   // Restore client state and candidate ID from localStorage on mount
   useEffect(() => {
-    fetchCommunitySubmissions();
-
     try {
       let cid = localStorage.getItem('crepe_candidate_id');
       if (!cid) {
@@ -235,7 +207,6 @@ export const MbaFormPlannerView: React.FC = () => {
       if (data.success) {
         setSaveSuccessMessage('Progress saved');
         setAutoSaveStatus('saved');
-        fetchCommunitySubmissions();
         setTimeout(() => setSaveSuccessMessage(null), 3000);
       }
     } catch (err) {
@@ -394,43 +365,28 @@ export const MbaFormPlannerView: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Mode Pill */}
-          <div className="bg-slate-950/80 border border-slate-800 p-2 rounded-2xl flex md:flex-col gap-2 shrink-0">
-            <button
-              onClick={() => setActiveTab('planner')}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center space-x-2 ${
-                activeTab === 'planner'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              <Sliders size={14} />
-              <span>Form Planner & Matcher</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('community')}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center space-x-2 ${
-                activeTab === 'community'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-              }`}
-            >
-              <Users size={14} />
-              <span>Aspirant Percentiles Archive</span>
-              {communitySubmissions.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-slate-800 text-amber-300 text-[10px]">
-                  {communitySubmissions.length}
-                </span>
-              )}
-            </button>
+          {/* Personal Plan Summary Card */}
+          <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl flex flex-col gap-2.5 shrink-0 min-w-[210px]">
+            <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Your Plan Overview</div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-xs text-slate-300">Shortlisted:</span>
+              <span className="font-mono font-bold text-amber-400 text-sm">{selectedBudgetSummary.count} colleges</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-xs text-slate-300">Total Fees:</span>
+              <span className="font-mono font-bold text-emerald-400 text-sm">₹{selectedBudgetSummary.totalFee.toLocaleString('en-IN')}</span>
+            </div>
+            <div className="pt-1.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Privacy:</span>
+              <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                <CheckCircle size={11} /> Private to you
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {activeTab === 'planner' ? (
-        <>
-          {/* 2. Mock Percentile Input Command Panel */}
+      {/* 2. Mock Percentile Input Command Panel */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
               <div>
@@ -1043,162 +999,6 @@ export const MbaFormPlannerView: React.FC = () => {
               </div>
             )}
           </div>
-        </>
-      ) : (
-        /* --- 6. SECOND TAB: ASPIRANT PERCENTILES ARCHIVE & COMMUNITY SUBMISSIONS --- */
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800">
-            <div>
-              <div className="flex items-center space-x-2">
-                <Users size={18} className="text-amber-500" />
-                <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                  Aspirant Percentiles Archive & Live Insights
-                </h2>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Real-time records of mock test percentiles submitted by aspirants preparing with Crepe. See how your peer group is performing across IMS, TIME, Cracku, and Career Launcher.
-              </p>
-            </div>
-
-            <button
-              onClick={fetchCommunitySubmissions}
-              disabled={isLoadingCommunity}
-              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center space-x-1.5 shrink-0"
-            >
-              <RefreshCw size={14} className={isLoadingCommunity ? 'animate-spin' : ''} />
-              <span>Refresh Records</span>
-            </button>
-          </div>
-
-          {/* Stats Metric Cards */}
-          {communityStats && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 text-xs">
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Total Aspirants</span>
-                <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
-                  {communityStats.totalSubmissions}
-                </span>
-                <span className="text-[10px] text-emerald-600 block mt-0.5">Recorded in database</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Average IMS SimCAT</span>
-                <span className="text-2xl font-black font-mono text-amber-600 dark:text-amber-400">
-                  {communityStats.avgIms ?? '--'} <span className="text-xs font-normal">%ile</span>
-                </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Across test-takers</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Average TIME AIMCAT</span>
-                <span className="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400">
-                  {communityStats.avgTime ?? '--'} <span className="text-xs font-normal">%ile</span>
-                </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">High rigor series</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Average Cracku</span>
-                <span className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
-                  {communityStats.avgCracku ?? '--'} <span className="text-xs font-normal">%ile</span>
-                </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Speed test series</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 col-span-2 sm:col-span-1">
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Overall Mean</span>
-                <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
-                  {communityStats.avgEffectivePercentile} <span className="text-xs font-normal">%ile</span>
-                </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Effective score</span>
-              </div>
-            </div>
-          )}
-
-          {/* Submissions Table / Feed */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="font-black text-sm text-slate-900 dark:text-white">
-                Live Submissions Feed ({communitySubmissions.length} records)
-              </h3>
-              <span className="text-xs text-slate-400">Stored in server storage</span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 dark:bg-slate-950/50 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800">
-                  <tr>
-                    <th className="px-6 py-3">Aspirant / Profile</th>
-                    <th className="px-4 py-3">Effective %ile</th>
-                    <th className="px-4 py-3">Mock Breakdown</th>
-                    <th className="px-4 py-3">Colleges Targeted</th>
-                    <th className="px-4 py-3">Form Budget</th>
-                    <th className="px-4 py-3">Recorded At</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {communitySubmissions.map(sub => (
-                    <tr key={sub.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
-                      <td className="px-6 py-3.5">
-                        <div className="font-bold text-slate-900 dark:text-white">{sub.candidateName}</div>
-                        <div className="text-[10px] text-slate-400">
-                          {sub.category} &bull; {sub.academicStream || 'General'}
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3.5">
-                        <span className="font-mono font-black text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg border border-amber-200 dark:border-amber-900/60">
-                          {sub.effectivePercentile}%ile
-                        </span>
-                        {sub.overridePercentile && (
-                          <span className="block text-[9px] text-slate-400 mt-0.5">Override</span>
-                        )}
-                      </td>
-
-                      <td className="px-4 py-3.5 font-mono text-[11px] text-slate-600 dark:text-slate-300">
-                        <div className="space-y-0.5">
-                          {sub.imsPercentile && <div>IMS: <span className="font-bold">{sub.imsPercentile}</span></div>}
-                          {sub.timePercentile && <div>TIME: <span className="font-bold">{sub.timePercentile}</span></div>}
-                          {sub.crackuPercentile && <div>Cracku: <span className="font-bold">{sub.crackuPercentile}</span></div>}
-                          {sub.clPercentile && <div>CL: <span className="font-bold">{sub.clPercentile}</span></div>}
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3.5">
-                        <div className="flex flex-wrap gap-1 max-w-[240px]">
-                          {sub.targetColleges && sub.targetColleges.slice(0, 4).map((col, idx) => (
-                            <span key={idx} className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-                              {col}
-                            </span>
-                          ))}
-                          {sub.targetColleges && sub.targetColleges.length > 4 && (
-                            <span className="text-[10px] text-slate-400 font-semibold self-center">
-                              +{sub.targetColleges.length - 4} more
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3.5 font-mono font-bold text-slate-800 dark:text-slate-200">
-                        ₹{sub.totalBudget.toLocaleString('en-IN')}
-                      </td>
-
-                      <td className="px-4 py-3.5 text-[11px] text-slate-400 whitespace-nowrap">
-                        {new Date(sub.timestamp).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

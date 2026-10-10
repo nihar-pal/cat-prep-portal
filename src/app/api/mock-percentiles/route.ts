@@ -166,8 +166,26 @@ function computeStatistics(submissions: MockPercentileSubmission[]) {
   };
 }
 
-export async function GET() {
+const ADMIN_KEY = process.env.CREPE_ADMIN_KEY || 'crepe_admin_2026';
+
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const authHeader = req.headers.get('x-admin-key');
+    const queryKey = searchParams.get('adminKey');
+
+    const providedKey = authHeader || queryKey;
+
+    if (!providedKey || providedKey !== ADMIN_KEY) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Unauthorized: Access to user percentile records is restricted to administrators only.' 
+        },
+        { status: 401 }
+      );
+    }
+
     const submissions = loadSubmissions();
     const sorted = [...submissions].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     const stats = computeStatistics(sorted);

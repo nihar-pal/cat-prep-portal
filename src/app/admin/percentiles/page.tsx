@@ -19,7 +19,13 @@ import {
   Database,
   ArrowUpDown,
   Flame,
-  Award
+  Award,
+  Lock,
+  Unlock,
+  Key,
+  LogOut,
+  ShieldCheck,
+  AlertTriangle
 } from 'lucide-react';
 import { CuteCatLogo } from '@/components/CuteCatLogo';
 import { MockPercentileSubmission } from '@/app/api/mock-percentiles/route';
@@ -33,25 +39,86 @@ export default function AdminPercentilesPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [selectedSubmission, setSelectedSubmission] = useState<MockPercentileSubmission | null>(null);
 
-  const fetchRecords = async () => {
+  // Admin authentication state
+  const [adminKey, setAdminKey] = useState<string>('');
+  const [passkeyInput, setPasskeyInput] = useState<string>('');
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+
+  const fetchRecords = async (keyToUse?: string) => {
+    const key = keyToUse !== undefined ? keyToUse : adminKey;
+    if (!key) {
+      setIsAuthorized(false);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const res = await fetch('/api/mock-percentiles');
+      const res = await fetch(`/api/mock-percentiles?adminKey=${encodeURIComponent(key)}`, {
+        headers: {
+          'x-admin-key': key
+        }
+      });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setSubmissions(data.submissions || []);
         setStats(data.stats || null);
+        setIsAuthorized(true);
+        setAdminKey(key);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('crepe_admin_key', key);
+        }
+        setAuthError(null);
+      } else {
+        setIsAuthorized(false);
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('crepe_admin_key');
+        }
+        setAuthError(data.error || 'Invalid admin passkey. Access restricted.');
       }
     } catch (err) {
       console.error('Error fetching admin records:', err);
+      setAuthError('Connection error while contacting admin API.');
+      setIsAuthorized(false);
     } finally {
       setIsLoading(false);
+      setIsVerifying(false);
     }
   };
 
   useEffect(() => {
-    fetchRecords();
+    const savedKey = typeof window !== 'undefined' ? sessionStorage.getItem('crepe_admin_key') : null;
+    if (savedKey) {
+      setAdminKey(savedKey);
+      fetchRecords(savedKey);
+    } else {
+      setIsLoading(false);
+    }
   }, []);
+
+  const handleAuthenticate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passkeyInput.trim()) {
+      setAuthError('Please enter the admin passkey to proceed');
+      return;
+    }
+    setIsVerifying(true);
+    setAuthError(null);
+    await fetchRecords(passkeyInput.trim());
+  };
+
+  const handleSignOut = () => {
+    setIsAuthorized(false);
+    setAdminKey('');
+    setPasskeyInput('');
+    setSubmissions([]);
+    setStats(null);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('crepe_admin_key');
+    }
+  };
 
   // Filtered submissions
   const filteredSubmissions = useMemo(() => {
@@ -121,6 +188,84 @@ export default function AdminPercentilesPage() {
     document.body.removeChild(link);
   };
 
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
+              <Lock size={28} />
+            </div>
+            <div className="flex items-center justify-center space-x-2 text-xs font-bold text-amber-500 uppercase tracking-widest">
+              <CuteCatLogo size={20} />
+              <span>Crepe Admin Intelligence</span>
+            </div>
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              Admin Access Gate
+            </h1>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Candidate mock percentiles and individual form planning data are strictly confidential. Only authorized administrators may view aspirant records.
+            </p>
+          </div>
+
+          <form onSubmit={handleAuthenticate} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                Admin Passkey
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  value={passkeyInput}
+                  onChange={(e) => setPasskeyInput(e.target.value)}
+                  placeholder="Enter admin passkey..."
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none text-white text-sm font-mono placeholder:text-slate-600 transition"
+                />
+                <Key size={16} className="absolute right-3.5 top-3.5 text-slate-500" />
+              </div>
+            </div>
+
+            {authError && (
+              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2">
+                <AlertTriangle size={14} className="shrink-0 text-rose-400" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isVerifying}
+              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-amber-500/10 disabled:opacity-50"
+            >
+              {isVerifying ? (
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  <span>Verifying Passkey...</span>
+                </>
+              ) : (
+                <>
+                  <Unlock size={16} />
+                  <span>Unlock Admin Console</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+            <Link 
+              href="/"
+              className="text-slate-400 hover:text-amber-400 transition flex items-center space-x-1"
+            >
+              <span>&larr; Return to Aspirant Portal</span>
+            </Link>
+            <span className="text-[10px] font-mono text-slate-600">v2.4 Confidential</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -142,14 +287,15 @@ export default function AdminPercentilesPage() {
               </div>
             </Link>
 
-            <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold font-mono">
-              Admin Access
+            <span className="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold font-mono">
+              <ShieldCheck size={12} />
+              <span>Admin Authorized</span>
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center flex-wrap gap-2">
             <button
-              onClick={fetchRecords}
+              onClick={() => fetchRecords()}
               disabled={isLoading}
               className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 font-bold text-xs flex items-center space-x-1.5 transition text-slate-700 dark:text-slate-300 shadow-sm"
             >
@@ -166,7 +312,7 @@ export default function AdminPercentilesPage() {
             </button>
 
             <a
-              href="/api/mock-percentiles"
+              href={`/api/mock-percentiles?adminKey=${encodeURIComponent(adminKey)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 font-bold text-xs flex items-center space-x-1"
@@ -176,6 +322,15 @@ export default function AdminPercentilesPage() {
               <span>Raw JSON</span>
               <ExternalLink size={11} />
             </a>
+
+            <button
+              onClick={handleSignOut}
+              className="px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 font-bold text-xs flex items-center space-x-1.5 transition"
+              title="End administrative session"
+            >
+              <LogOut size={13} />
+              <span>Lock Console</span>
+            </button>
           </div>
         </div>
 

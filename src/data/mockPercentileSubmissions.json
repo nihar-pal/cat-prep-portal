@@ -1,5 +1,23 @@
 [
   {
+    "id": "sub_1791619910881_89",
+    "candidateName": "Privacy Test Candidate",
+    "imsPercentile": 91,
+    "timePercentile": 88.5,
+    "crackuPercentile": null,
+    "clPercentile": null,
+    "overridePercentile": null,
+    "effectivePercentile": 92.5,
+    "category": "General",
+    "academicStream": "Not Specified",
+    "targetColleges": [
+      "SPJIMR Mumbai"
+    ],
+    "totalBudget": 2500,
+    "timestamp": "2026-10-10T08:11:50.881Z",
+    "notes": ""
+  },
+  {
     "id": "sub_1791617584884_975",
     "candidateName": "Tester Aspirant",
     "imsPercentile": 93.5,
