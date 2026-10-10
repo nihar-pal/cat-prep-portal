@@ -233,10 +233,10 @@ export const MbaFormPlannerView: React.FC = () => {
 
       const data = await res.json();
       if (data.success) {
-        setSaveSuccessMessage('Your mock percentile and form plan have been saved to the backend database!');
+        setSaveSuccessMessage('Progress saved');
         setAutoSaveStatus('saved');
         fetchCommunitySubmissions();
-        setTimeout(() => setSaveSuccessMessage(null), 5000);
+        setTimeout(() => setSaveSuccessMessage(null), 3000);
       }
     } catch (err) {
       console.error('Error saving record:', err);
@@ -442,18 +442,18 @@ export const MbaFormPlannerView: React.FC = () => {
                   {autoSaveStatus === 'saving' && (
                     <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-[10px] font-bold animate-pulse">
                       <RefreshCw size={10} className="animate-spin" />
-                      <span>Auto-saving to backend...</span>
+                      <span>Saving...</span>
                     </span>
                   )}
                   {autoSaveStatus === 'saved' && (
                     <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold">
                       <CheckCircle size={10} />
-                      <span>Auto-saved to backend {lastSavedTime ? `(${lastSavedTime})` : ''}</span>
+                      <span>Progress saved {lastSavedTime ? `(${lastSavedTime})` : ''}</span>
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Enter your latest or median percentile in major coaching mocks. Values auto-save to the backend as you type.
+                  Enter your latest or median percentile in major coaching mocks. Values auto-save as you type.
                 </p>
               </div>
 
@@ -676,7 +676,7 @@ export const MbaFormPlannerView: React.FC = () => {
                 ) : (
                   <Bookmark size={14} className="text-amber-500" />
                 )}
-                <span>Save & Record My Mock Plan</span>
+                <span>Save Progress</span>
               </button>
             </div>
 
