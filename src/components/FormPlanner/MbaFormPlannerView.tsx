@@ -87,6 +87,9 @@ export const MbaFormPlannerView: React.FC = () => {
   const [communitySubmissions, setCommunitySubmissions] = useState<MockPercentileSubmission[]>([]);
   const [communityStats, setCommunityStats] = useState<any>(null);
   const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
+  const [candidateId, setCandidateId] = useState<string>('');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [lastSavedTime, setLastSavedTime] = useState<string>('');
   const [isSavingRecord, setIsSavingRecord] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [hasCopiedPlan, setHasCopiedPlan] = useState(false);
@@ -108,11 +111,95 @@ export const MbaFormPlannerView: React.FC = () => {
     }
   };
 
+  // Restore client state and candidate ID from localStorage on mount
   useEffect(() => {
     fetchCommunitySubmissions();
+
+    try {
+      let cid = localStorage.getItem('crepe_candidate_id');
+      if (!cid) {
+        cid = `sub_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+        localStorage.setItem('crepe_candidate_id', cid);
+      }
+      setCandidateId(cid);
+
+      const savedState = localStorage.getItem('crepe_form_planner_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        if (parsed.mockInputs) setMockInputs(parsed.mockInputs);
+        if (parsed.candidateName) setCandidateName(parsed.candidateName);
+        if (parsed.category) setCategory(parsed.category);
+        if (parsed.academicStream) setAcademicStream(parsed.academicStream);
+        if (Array.isArray(parsed.selectedCollegeIds) && parsed.selectedCollegeIds.length > 0) {
+          setSelectedCollegeIds(new Set(parsed.selectedCollegeIds));
+        }
+      }
+    } catch (e) {
+      console.error('Error loading local planner state:', e);
+    }
   }, []);
 
-  // Save current record to backend
+  // Debounced Automatic Save to Backend & LocalStorage
+  useEffect(() => {
+    if (!candidateId) return;
+
+    // Persist to localStorage immediately
+    try {
+      localStorage.setItem('crepe_form_planner_state', JSON.stringify({
+        mockInputs,
+        candidateName,
+        category,
+        academicStream,
+        selectedCollegeIds: Array.from(selectedCollegeIds)
+      }));
+    } catch (_) {}
+
+    setAutoSaveStatus('saving');
+
+    const timer = setTimeout(async () => {
+      try {
+        const selectedNames = MBA_PLANNER_COLLEGES
+          .filter(c => selectedCollegeIds.has(c.id))
+          .map(c => c.shortName);
+
+        const totalBudget = MBA_PLANNER_COLLEGES
+          .filter(c => selectedCollegeIds.has(c.id))
+          .reduce((sum, c) => sum + c.applicationFee, 0);
+
+        const res = await fetch('/api/mock-percentiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateId,
+            candidateName: candidateName || 'Anonymous Aspirant',
+            imsPercentile: mockInputs.imsPercentile || null,
+            timePercentile: mockInputs.timePercentile || null,
+            crackuPercentile: mockInputs.crackuPercentile || null,
+            clPercentile: mockInputs.clPercentile || null,
+            overridePercentile: mockInputs.isOverrideActive ? mockInputs.overridePercentile : null,
+            effectivePercentile,
+            category,
+            academicStream,
+            targetColleges: selectedNames,
+            totalBudget
+          })
+        });
+
+        if (res.ok) {
+          setAutoSaveStatus('saved');
+          const now = new Date();
+          setLastSavedTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        }
+      } catch (err) {
+        console.warn('Auto-save network error:', err);
+        setAutoSaveStatus('idle');
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [candidateId, mockInputs, candidateName, category, academicStream, selectedCollegeIds, effectivePercentile]);
+
+  // Manual save trigger (instant)
   const handleSaveMockRecord = async () => {
     setIsSavingRecord(true);
     setSaveSuccessMessage(null);
@@ -129,6 +216,7 @@ export const MbaFormPlannerView: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          candidateId,
           candidateName: candidateName || 'Anonymous Aspirant',
           imsPercentile: mockInputs.imsPercentile || null,
           timePercentile: mockInputs.timePercentile || null,
@@ -146,6 +234,7 @@ export const MbaFormPlannerView: React.FC = () => {
       const data = await res.json();
       if (data.success) {
         setSaveSuccessMessage('Your mock percentile and form plan have been saved to the backend database!');
+        setAutoSaveStatus('saved');
         fetchCommunitySubmissions();
         setTimeout(() => setSaveSuccessMessage(null), 5000);
       }
@@ -345,14 +434,26 @@ export const MbaFormPlannerView: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                   <h2 className="text-lg font-black text-slate-900 dark:text-white">
                     Step 1: Enter Your Mock Series Percentiles
                   </h2>
+                  {autoSaveStatus === 'saving' && (
+                    <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-[10px] font-bold animate-pulse">
+                      <RefreshCw size={10} className="animate-spin" />
+                      <span>Auto-saving to backend...</span>
+                    </span>
+                  )}
+                  {autoSaveStatus === 'saved' && (
+                    <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold">
+                      <CheckCircle size={10} />
+                      <span>Auto-saved to backend {lastSavedTime ? `(${lastSavedTime})` : ''}</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Enter your latest or median percentile in major coaching mocks. Our empirical calibration normalizes institute rigor.
+                  Enter your latest or median percentile in major coaching mocks. Values auto-save to the backend as you type.
                 </p>
               </div>
 

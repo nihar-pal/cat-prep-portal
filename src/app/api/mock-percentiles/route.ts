@@ -19,33 +19,63 @@ export interface MockPercentileSubmission {
   notes?: string;
 }
 
-const DATA_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'mockPercentileSubmissions.json');
+const LOCAL_DATA_PATH = path.join(process.cwd(), 'src', 'data', 'mockPercentileSubmissions.json');
+const TMP_DATA_PATH = path.join('/tmp', 'crepe_mock_submissions.json');
 
-// In-memory fallback if file system is read-only (e.g. serverless)
+// In-memory fallback ensuring data stays alive across serverless container lifecycle
 let inMemorySubmissions: MockPercentileSubmission[] = [];
 
 function loadSubmissions(): MockPercentileSubmission[] {
+  // 1. Try /tmp in serverless environment
   try {
-    if (fs.existsSync(DATA_FILE_PATH)) {
-      const fileData = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
-      const parsed = JSON.parse(fileData);
+    if (fs.existsSync(TMP_DATA_PATH)) {
+      const tmpData = fs.readFileSync(TMP_DATA_PATH, 'utf-8');
+      const parsed = JSON.parse(tmpData);
       if (Array.isArray(parsed) && parsed.length > 0) {
         inMemorySubmissions = parsed;
         return parsed;
       }
     }
   } catch (err) {
-    console.error('Error reading mockPercentileSubmissions.json:', err);
+    // Continue to next source
   }
+
+  // 2. Try project source file
+  try {
+    if (fs.existsSync(LOCAL_DATA_PATH)) {
+      const fileData = fs.readFileSync(LOCAL_DATA_PATH, 'utf-8');
+      const parsed = JSON.parse(fileData);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        inMemorySubmissions = parsed;
+        // Seed to /tmp as well
+        try {
+          fs.writeFileSync(TMP_DATA_PATH, JSON.stringify(parsed, null, 2), 'utf-8');
+        } catch (_) {}
+        return parsed;
+      }
+    }
+  } catch (err) {
+    // Continue to in-memory fallback
+  }
+
   return inMemorySubmissions;
 }
 
 function saveSubmissions(submissions: MockPercentileSubmission[]) {
   inMemorySubmissions = submissions;
+
+  // Attempt write to /tmp (always writable in AWS Lambda / Vercel Serverless)
   try {
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(submissions, null, 2), 'utf-8');
+    fs.writeFileSync(TMP_DATA_PATH, JSON.stringify(submissions, null, 2), 'utf-8');
   } catch (err) {
-    console.warn('Could not persist to file system (operating in memory mode):', err);
+    // Silently continue
+  }
+
+  // Attempt write to local data directory (works in local dev / persistent disk)
+  try {
+    fs.writeFileSync(LOCAL_DATA_PATH, JSON.stringify(submissions, null, 2), 'utf-8');
+  } catch (err) {
+    // Read-only filesystem in serverless, handled gracefully
   }
 }
 
@@ -54,10 +84,10 @@ function computeStatistics(submissions: MockPercentileSubmission[]) {
     return {
       totalSubmissions: 0,
       avgEffectivePercentile: 0,
-      avgIms: 0,
-      avgTime: 0,
-      avgCracku: 0,
-      avgCl: 0,
+      avgIms: null,
+      avgTime: null,
+      avgCracku: null,
+      avgCl: null,
       brackets: {
         below85: 0,
         from85to90: 0,
@@ -157,6 +187,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const {
+      candidateId,
       candidateName,
       imsPercentile,
       timePercentile,
@@ -179,10 +210,16 @@ export async function POST(req: Request) {
     }
 
     const currentSubmissions = loadSubmissions();
+    const existingIndex = candidateId ? currentSubmissions.findIndex(s => s.id === candidateId) : -1;
 
-    const newRecord: MockPercentileSubmission = {
-      id: `sub_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      candidateName: (candidateName && candidateName.trim()) ? candidateName.trim() : `Aspirant #${Math.floor(1000 + Math.random() * 9000)}`,
+    const recordId = candidateId || `sub_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const formattedName = (candidateName && candidateName.trim()) 
+      ? candidateName.trim() 
+      : `Aspirant #${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const submissionData: MockPercentileSubmission = {
+      id: recordId,
+      candidateName: formattedName,
       imsPercentile: typeof imsPercentile === 'number' ? +imsPercentile.toFixed(2) : null,
       timePercentile: typeof timePercentile === 'number' ? +timePercentile.toFixed(2) : null,
       crackuPercentile: typeof crackuPercentile === 'number' ? +crackuPercentile.toFixed(2) : null,
@@ -191,20 +228,29 @@ export async function POST(req: Request) {
       effectivePercentile: +effectivePercentile.toFixed(2),
       category,
       academicStream,
-      targetColleges: Array.isArray(targetColleges) ? targetColleges.slice(0, 20) : [],
+      targetColleges: Array.isArray(targetColleges) ? targetColleges.slice(0, 25) : [],
       totalBudget: typeof totalBudget === 'number' ? totalBudget : 0,
       timestamp: new Date().toISOString(),
       notes: typeof notes === 'string' ? notes.slice(0, 300) : '',
     };
 
-    const updated = [newRecord, ...currentSubmissions];
+    let updated: MockPercentileSubmission[];
+    if (existingIndex >= 0) {
+      // Update candidate's existing record in-place to avoid spam/duplicates
+      updated = [...currentSubmissions];
+      updated[existingIndex] = submissionData;
+    } else {
+      // Prepend new candidate entry
+      updated = [submissionData, ...currentSubmissions];
+    }
+
     saveSubmissions(updated);
     const stats = computeStatistics(updated);
 
     return NextResponse.json({
       success: true,
-      message: 'Mock percentile record saved successfully',
-      submission: newRecord,
+      message: existingIndex >= 0 ? 'Mock record updated automatically' : 'New mock record saved automatically',
+      submission: submissionData,
       stats,
     });
   } catch (error) {
