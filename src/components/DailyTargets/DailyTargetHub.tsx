@@ -21,7 +21,8 @@ import {
   Building2,
   UserCheck,
   Brain,
-  Gauge
+  Gauge,
+  GraduationCap
 } from 'lucide-react';
 import { DailyTarget, ExamType, Question, SectionType } from '@/types/exam';
 import { EXAM_CONFIGS } from '@/data/multiExamConfigs';
@@ -222,11 +223,35 @@ export const DailyTargetHub: React.FC<DailyTargetHubProps> = ({
           <span className="text-[11px] text-slate-400 font-medium">Topper-Grade Preparation Labs</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* MBA Form Planner */}
+          <Link
+            href="/mba-form-planner"
+            className="p-5 rounded-3xl border border-amber-300 dark:border-amber-800/60 bg-gradient-to-br from-amber-50/80 to-amber-100/40 dark:from-amber-950/30 dark:to-slate-900 hover:border-amber-500 transition group shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-105 transition-transform">
+                <GraduationCap size={20} />
+              </div>
+              <div className="flex items-center space-x-1.5 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Form Architect</span>
+                <span className="text-[9px] bg-amber-200 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 font-bold px-1.5 py-0.5 rounded-full">New</span>
+              </div>
+              <h4 className="font-black text-base text-slate-900 dark:text-white">MBA Form Planner</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                Filter colleges by Target, Safe, Backup & Difficult. Budget separate applications (BITSoM, SPJIMR, MDI) and enter mock series percentiles.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-amber-200/60 dark:border-amber-800/30 text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center justify-between">
+              <span>Plan My College Forms</span>
+              <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </div>
+          </Link>
+
           {/* Score & College Predictor */}
           <Link
             href="/score-predictor"
-            className="p-5 rounded-3xl border border-amber-300 dark:border-amber-800/60 bg-gradient-to-br from-amber-50/70 to-amber-100/30 dark:from-amber-950/20 dark:to-slate-900 hover:border-amber-500 transition group shadow-sm flex flex-col justify-between"
+            className="p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-amber-400/60 transition group shadow-sm flex flex-col justify-between"
           >
             <div>
               <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-105 transition-transform">

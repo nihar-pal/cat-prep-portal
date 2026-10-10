@@ -206,7 +206,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={() => setIsToolsDropdownOpen(!isToolsDropdownOpen)}
                   className={`px-3 py-1.5 rounded-full transition flex items-center space-x-1.5 ${
-                    ['/flashcards', '/rc-pacer', '/colleges', '/profile-evaluator', '/mistake-book', '/ai-generator'].some(path => pathname.startsWith(path))
+                    ['/mba-form-planner', '/flashcards', '/rc-pacer', '/colleges', '/profile-evaluator', '/mistake-book', '/ai-generator'].some(path => pathname.startsWith(path))
                       ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900'
                   }`}
@@ -223,6 +223,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
                       Mastery Tools & Labs
                     </div>
+
+                    <Link
+                      href="/mba-form-planner"
+                      onClick={() => setIsToolsDropdownOpen(false)}
+                      className="flex items-start space-x-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/70 transition group"
+                    >
+                      <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform mt-0.5">
+                        <GraduationCap size={14} />
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-1">
+                          <span>MBA Form Planner</span>
+                          <span className="text-[9px] bg-amber-200 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 px-1 rounded font-bold">New</span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">Target/Safe matcher & budget architect</div>
+                      </div>
+                    </Link>
 
                     <Link
                       href="/flashcards"
@@ -500,6 +517,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>Score & Percentile Predictor 🎯</span>
               </Link>
               <Link
+                href="/mba-form-planner"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-900 text-amber-600 dark:text-amber-400"
+              >
+                <GraduationCap size={15} />
+                <span>MBA Form Planner & Budget 📑</span>
+              </Link>
+              <Link
                 href="/archives"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900 text-emerald-600 dark:text-emerald-400"
@@ -522,6 +547,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
                 Mastery Labs & Tools
               </div>
+              <Link
+                href="/mba-form-planner"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center space-x-2.5 px-3 py-2 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-900 text-amber-600 dark:text-amber-400"
+              >
+                <GraduationCap size={15} className="text-amber-500" />
+                <span>MBA Form Planner (Target & Safe)</span>
+              </Link>
               <Link
                 href="/flashcards"
                 onClick={() => setIsMobileMenuOpen(false)}

@@ -1,0 +1,143 @@
+[
+  {
+    "id": "sub_1791617584884_975",
+    "candidateName": "Tester Aspirant",
+    "imsPercentile": 93.5,
+    "timePercentile": 89,
+    "crackuPercentile": 94.5,
+    "clPercentile": null,
+    "overridePercentile": null,
+    "effectivePercentile": 93.8,
+    "category": "General",
+    "academicStream": "Not Specified",
+    "targetColleges": [
+      "BITSoM Mumbai",
+      "SPJIMR Mumbai"
+    ],
+    "totalBudget": 3500,
+    "timestamp": "2026-10-10T07:33:04.884Z",
+    "notes": ""
+  },
+  {
+    "id": "sub_101",
+    "candidateName": "Rohan M. (GEM)",
+    "imsPercentile": 96.2,
+    "timePercentile": 92.8,
+    "crackuPercentile": 97,
+    "clPercentile": 95.5,
+    "overridePercentile": null,
+    "effectivePercentile": 96.1,
+    "category": "General",
+    "academicStream": "Engineering",
+    "targetColleges": [
+      "FMS Delhi",
+      "SPJIMR Mumbai",
+      "MDI Gurgaon",
+      "SJMSOM IIT Bombay",
+      "BITSoM Mumbai"
+    ],
+    "totalBudget": 9200,
+    "timestamp": "2026-10-09T18:45:00.000Z"
+  },
+  {
+    "id": "sub_102",
+    "candidateName": "Ananya S. (Non-Engg)",
+    "imsPercentile": 91.5,
+    "timePercentile": 86.4,
+    "crackuPercentile": 93,
+    "clPercentile": null,
+    "overridePercentile": null,
+    "effectivePercentile": 91.8,
+    "category": "General",
+    "academicStream": "Commerce",
+    "targetColleges": [
+      "BITSoM Mumbai",
+      "MDI Gurgaon",
+      "GIM Goa",
+      "IMT Ghaziabad"
+    ],
+    "totalBudget": 9500,
+    "timestamp": "2026-10-09T15:20:00.000Z"
+  },
+  {
+    "id": "sub_103",
+    "candidateName": "Aditya K. (OBC)",
+    "imsPercentile": 88,
+    "timePercentile": 84.5,
+    "crackuPercentile": 90.2,
+    "clPercentile": 87.5,
+    "overridePercentile": 90,
+    "effectivePercentile": 90,
+    "category": "NC-OBC",
+    "academicStream": "Engineering",
+    "targetColleges": [
+      "IIM CAP Consortium",
+      "DMS IIT Delhi",
+      "IMT Ghaziabad",
+      "XIMB Bhubaneswar"
+    ],
+    "totalBudget": 6100,
+    "timestamp": "2026-10-09T11:10:00.000Z"
+  },
+  {
+    "id": "sub_104",
+    "candidateName": "Pooja V. (Arts)",
+    "imsPercentile": 94.8,
+    "timePercentile": 90.1,
+    "crackuPercentile": null,
+    "clPercentile": 93.6,
+    "overridePercentile": null,
+    "effectivePercentile": 94.2,
+    "category": "General",
+    "academicStream": "Humanities",
+    "targetColleges": [
+      "SPJIMR Mumbai",
+      "MICA Ahmedabad",
+      "BITSoM Mumbai",
+      "XLRI Jamshedpur"
+    ],
+    "totalBudget": 7800,
+    "timestamp": "2026-10-08T20:30:00.000Z"
+  },
+  {
+    "id": "sub_105",
+    "candidateName": "Siddharth T. (WorkEx 30m)",
+    "imsPercentile": 98.4,
+    "timePercentile": 96,
+    "crackuPercentile": 98.9,
+    "clPercentile": 97.8,
+    "overridePercentile": 99,
+    "effectivePercentile": 99,
+    "category": "General",
+    "academicStream": "Engineering",
+    "targetColleges": [
+      "IIM Ahmedabad",
+      "IIM Bangalore",
+      "IIM Calcutta",
+      "FMS Delhi",
+      "SPJIMR Mumbai"
+    ],
+    "totalBudget": 3000,
+    "timestamp": "2026-10-08T16:15:00.000Z"
+  },
+  {
+    "id": "sub_106",
+    "candidateName": "Megha R. (Fresher)",
+    "imsPercentile": 84.5,
+    "timePercentile": 79.2,
+    "crackuPercentile": 86,
+    "clPercentile": 83,
+    "overridePercentile": null,
+    "effectivePercentile": 84.8,
+    "category": "General",
+    "academicStream": "Economics",
+    "targetColleges": [
+      "Great Lakes Chennai",
+      "TAPMI Manipal",
+      "FORE New Delhi",
+      "K J Somaiya Mumbai"
+    ],
+    "totalBudget": 9200,
+    "timestamp": "2026-10-08T09:40:00.000Z"
+  }
+]
